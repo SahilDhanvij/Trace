@@ -1,6 +1,4 @@
-# Travel Graph Backend
-
-Backend service for a personal travel map and vault application.
+### Trace
 
 ## Tech Stack
 - Node.js
@@ -21,3 +19,10 @@ Backend service for a personal travel map and vault application.
 ```bash
 npm install
 npm run start:dev
+
+## System Context Diagram
+
+The Travel Identity Map Platform is a map-first system where users
+create verified place nodes backed by Google Drive photo references.
+
+![System Context Diagram](System-Context-diagram.png)
