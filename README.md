@@ -25,4 +25,4 @@ npm run start:dev
 The Travel Identity Map Platform is a map-first system where users
 create verified place nodes backed by Google Drive photo references.
 
-![System Context Diagram](System-Context-diagram.png)
+![System Context Diagram](./docs/System-Context-diagram.png)
