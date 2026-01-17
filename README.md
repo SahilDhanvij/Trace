@@ -1,7 +1,7 @@
-### Trace
+## Trace
 
 ## Tech Stack
-- Node.js
+- Next.js
 - NestJS
 - TypeScript
 - PostgreSQL
@@ -20,6 +20,14 @@ The Travel Identity Map Platform is a map-first system where users
 create verified place nodes backed by Google Drive photo references.
 
 ![System Context Diagram](./docs/System-Context-diagram.png)
+
+## High Level Design
+
+![High Level Design](./docs/HLD.png)
+
+## ER Diagram
+
+![ER Diagram](./docs/ErDiagram.png)
 
 ## Development Setup
 
