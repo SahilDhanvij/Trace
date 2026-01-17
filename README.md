@@ -1,12 +1,41 @@
-## Trace
+# Trace 🌍
+Trace is a **map-first travel identity platform** where users build
+a personal world graph of places they’ve visited.
+
+Each place is represented as a **node on the world map**, backed by
+verifiable proof via Google Drive photo references.
+
+This repository currently contains the **foundational backend architecture**
+and infrastructure setup.
+
+## Core Idea
+
+- 🌍 Interactive world map as the primary interface
+- 📍 Place nodes represent visited locations
+- 🧭 Travel edges represent journeys between places
+- 🗂️ Place vaults store notes and proof photo references
+- 🔒 Privacy-first: no media files are stored, only metadata
+
+## Architectural Overview
+- Spatial + graph-backed data model (PostgreSQL + PostGIS)
+- Clean separation of concerns
+- External integrations isolated via dedicated modules
+- Modular monolith backend (NestJS)
 
 ## Tech Stack
-- Next.js
+
+### Backend
+- Node.js (LTS)
 - NestJS
 - TypeScript
-- PostgreSQL
-- Prisma
-- PostGIS
+- PostgreSQL + PostGIS
+- Prisma ORM (v7)
+
+### Infrastructure
+- Docker (local development)
+- Google OAuth (planned)
+- Google Drive API (planned)
+- Map provider (planned)
 
 ## Features
 - User authentication (WIP)
@@ -15,9 +44,6 @@
 - Place vaults for notes and photos
 
 ## System Context Diagram
-
-The Travel Identity Map Platform is a map-first system where users
-create verified place nodes backed by Google Drive photo references.
 
 ![System Context Diagram](./docs/System-Context-diagram.png)
 
@@ -29,9 +55,26 @@ create verified place nodes backed by Google Drive photo references.
 
 ![ER Diagram](./docs/ErDiagram.png)
 
+## Current Status
+
+✅ Architecture & domain design  
+✅ Dockerized database (PostgreSQL + PostGIS)  
+✅ Prisma configured and connected  
+✅ NestJS project structure initialized  
+
+🚧 Authentication (Google OAuth) — next  
+🚧 Core APIs (nodes, edges, vaults)  
+🚧 Map-first frontend experience  
+
 ## Development Setup
 
 ```bash
+# install dependencies
 npm install
+
+# start database
+docker compose up -d
+
+# start backend
 npm run start:dev
 
