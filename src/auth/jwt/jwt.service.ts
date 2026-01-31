@@ -1,6 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService as NestJwtService } from '@nestjs/jwt';
 
+
+
+// This issues token
 @Injectable()
 export class JwtService {
   constructor(private readonly jwt: NestJwtService) {}
