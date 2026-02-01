@@ -6,9 +6,11 @@ import { googleService } from './google/googleService';
 import { JwtService } from './jwt/jwt.service';
 import { JwtModule } from '@nestjs/jwt';
 import { JwtStrategyService } from './jwt/jwt-strategy.service';
+import { CommonModule } from 'src/common/common.module';
+
 @Module({
   controllers: [AuthController],
   providers: [AuthService, googleService, JwtService, JwtStrategyService],
-  imports : [UserModule, JwtModule.register({})]
+  imports: [UserModule, CommonModule, JwtModule.register({})],
 })
 export class AuthModule {}

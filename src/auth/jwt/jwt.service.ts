@@ -21,15 +21,20 @@ export class JwtService {
     );
   }
 
-  generateRefreshToken(user : {id : string}) {
+  generateRefreshToken(user: { id: string }) {
     return this.jwt.sign(
+      { sub: user.id },
       {
-        sub : user.id
-      },
-      {
-        secret : process.env.JWT_REFRESH_SECRET,
-        expiresIn : '7d'
+        secret: process.env.JWT_REFRESH_SECRET,
+        expiresIn: '7d',
       },
     );
+  }
+
+  /** Verifies refresh token and returns payload; throws if invalid or expired. */
+  verifyRefreshToken(token: string): { sub: string } {
+    return this.jwt.verify(token, {
+      secret: process.env.JWT_REFRESH_SECRET,
+    }) as { sub: string };
   }
 }

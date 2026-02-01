@@ -6,10 +6,25 @@ datasource db {
   provider = "postgresql"
 }
 
-model User{
+model User {
+  id            String         @id @default(uuid())
+  email         String         @unique
+  name          String?
+  googleId      String?        @unique
+  refreshTokens RefreshToken[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+}
+
+model RefreshToken {
   id        String   @id @default(uuid())
-  email     String   @unique
-  name      String?
-  googleId  String?  @unique
+  userId    String
+  hash      String
+  expiresAt DateTime
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }
