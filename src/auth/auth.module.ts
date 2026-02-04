@@ -11,7 +11,12 @@ import { RefreshTokenService } from './refresh-token.service';
 
 @Module({
   controllers: [AuthController],
-  providers: [AuthService, googleService, JwtService, JwtStrategyService, RefreshTokenService],
-  imports: [UserModule, CommonModule, JwtModule.register({})],
+  providers: [
+    AuthService,
+    googleService,
+    JwtService,
+    JwtStrategyService,
+    RefreshTokenService,
+  ]
 })
 export class AuthModule {}
