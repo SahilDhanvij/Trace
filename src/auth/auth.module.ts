@@ -10,6 +10,7 @@ import { CommonModule } from 'src/common/common.module';
 import { RefreshTokenService } from './refresh-token.service';
 
 @Module({
+  imports: [UserModule, CommonModule, JwtModule.register({})],
   controllers: [AuthController],
   providers: [
     AuthService,

@@ -3,6 +3,7 @@ import cookieParser from 'cookie-parser';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
+import { JwtAuthGuard } from './auth/jwt/jwt-auth.guard';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -13,6 +14,7 @@ async function bootstrap() {
       transform : true
     }),
   );
+  app.useGlobalGuards(new JwtAuthGuard());
   app.use(cookieParser());
   app.enableCors({
     origin : process.env.FRONTEND_URL,

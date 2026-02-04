@@ -9,16 +9,17 @@ import {
 import express from 'express';
 import { AuthService } from './auth.service';
 
-import {
-  setRefreshTokenCookie,
-  clearRefreshTokenCookie,
-} from './cookie.util';
+import { setRefreshTokenCookie, clearRefreshTokenCookie } from './cookie.util';
 import { GoogleDto } from 'src/DTO/googleDTO';
+import { Throttle } from '@nestjs/throttler';
+import { Public } from 'src/common/decorators/public.decorator';
 
+@Public()
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
   @Post('google')
   async loginWithGoogle(
     @Body() dto: GoogleDto,
@@ -32,16 +33,18 @@ export class AuthController {
     };
   }
 
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
   @Post('refresh')
   async refresh(
     @Req() req: express.Request,
     @Res({ passthrough: true }) res: express.Response,
   ) {
     const refreshToken = req.cookies?.refresh_token;
-    if(!refreshToken){
-        throw new UnauthorizedException('Missing refresh token');
+    if (!refreshToken) {
+      throw new UnauthorizedException('Missing refresh token');
     }
-    const{accessToken, refreshToken : newRefreshToken} = await this.authService.exchangeRefreshToken(refreshToken);
+    const { accessToken, refreshToken: newRefreshToken } =
+      await this.authService.exchangeRefreshToken(refreshToken);
     setRefreshTokenCookie(res, newRefreshToken);
     return {
       accessToken,
@@ -49,12 +52,15 @@ export class AuthController {
   }
 
   @Post('logout')
-  async logOut(@Req() req : express.Request, @Res({passthrough : true}) res : express.Response) {
+  async logOut(
+    @Req() req: express.Request,
+    @Res({ passthrough: true }) res: express.Response,
+  ) {
     const refreshToken = req.cookies?.refresh_token;
-    if(refreshToken){
-        await this.authService.logOut(refreshToken);
+    if (refreshToken) {
+      await this.authService.logOut(refreshToken);
     }
     clearRefreshTokenCookie(res);
-    return { success : true };
+    return { success: true };
   }
 }
