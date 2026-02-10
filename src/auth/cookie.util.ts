@@ -7,13 +7,13 @@ export function setRefreshTokenCookie(res : Response, token : string){
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax',
-        path : '/auth/refresh',
+        path : '/auth',
         maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 }  
 
 export function clearRefreshTokenCookie(res : Response){
     res.clearCookie(REFRESH_COOKIE_NAME, {
-        path : '/auth/refresh',
+        path : '/auth',
     });
 }

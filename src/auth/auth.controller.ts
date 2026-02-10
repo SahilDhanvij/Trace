@@ -3,6 +3,7 @@ import {
   Post,
   Body,
   Req,
+  Get,
   Res,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -14,11 +15,11 @@ import { GoogleDto } from 'src/DTO/googleDTO';
 import { Throttle } from '@nestjs/throttler';
 import { Public } from 'src/common/decorators/public.decorator';
 
-@Public()
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  @Public()
   @Throttle({ default: { limit: 5, ttl: 60000 } })
   @Post('google')
   async loginWithGoogle(
@@ -33,6 +34,7 @@ export class AuthController {
     };
   }
 
+  @Public()
   @Throttle({ default: { limit: 5, ttl: 60000 } })
   @Post('refresh')
   async refresh(
@@ -49,6 +51,11 @@ export class AuthController {
     return {
       accessToken,
     };
+  }
+
+  @Get('me')
+  async getMe(@Req() req) {
+    return req.user;
   }
 
   @Post('logout')

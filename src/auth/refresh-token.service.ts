@@ -65,8 +65,8 @@ export class RefreshTokenService {
     };
   }
 
-  async revokeRefreshTokens(userId: string) {
-    const hashValue = hashToken(userId);
+  async revokeRefreshToken(token: string) {
+    const hashValue = hashToken(token);
     await this.prisma.refreshToken.deleteMany({
       where: {
         hash : hashValue,

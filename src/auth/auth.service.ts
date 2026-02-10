@@ -49,7 +49,7 @@ export class AuthService {
   }
 
   async logOut(refreshToken: string) {
-    await this.refreshTokenService.revokeRefreshTokens(refreshToken);
+    await this.refreshTokenService.revokeRefreshToken(refreshToken);
   }
 
 }

@@ -9,6 +9,8 @@ import { VaultModule } from './vault/vault.module';
 import { IntegrationsModule } from './integrations/integrations.module';
 import { CommonModule } from './common/common.module';
 import { ThrottlerModule } from '@nestjs/throttler';
+import { APP_GUARD } from '@nestjs/core';
+import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 
 @Module({
   imports: [
@@ -27,6 +29,12 @@ import { ThrottlerModule } from '@nestjs/throttler';
     ]),
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    },
+  ],
 })
 export class AppModule {}
