@@ -11,22 +11,22 @@ export class NodesController {
 
     @Post()
     async createNode(@Req() req, @Body() dto : CreateNodeDTO){
-        return this.nodeService.createNode(req.user.id, dto);
+        return this.nodeService.createNode(req.user.userId, dto);
     }
 
     @Get()
     async getUserNodes(@Req() req, @Query() query : GetNodesQueryDto){
-        return this.nodeService.getUserNodes(req.user.id, query);
+        return this.nodeService.getUserNodes(req.user.userId, query);
     }
 
     @Get(':id')
     async getNodeById(@Req() req, @Param('id') nodeId : string){
-        return this.nodeService.getNodeById(req.user.id, nodeId);    
+        return this.nodeService.getNodeById(req.user.userId, nodeId);    
     }
 
     @Delete(':id')
     async deleteNode(@Req() req, @Param('id') nodeId : string){
-        return this.nodeService.deleteNode(req.user.id, nodeId);    
+        return this.nodeService.deleteNode(req.user.userId, nodeId);    
     }
 
 }

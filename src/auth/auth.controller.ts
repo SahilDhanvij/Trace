@@ -70,4 +70,21 @@ export class AuthController {
     clearRefreshTokenCookie(res);
     return { success: true };
   }
+
+  //Not needed for prod movement
+  @Public()
+  @Post('dev-login')
+  async devLogin(
+    @Body() body: { email: string },
+    @Res({ passthrough: true }) res: express.Response,
+  ) {
+    const result = await this.authService.devLogin(body.email);
+
+    setRefreshTokenCookie(res, result.refreshToken);
+
+    return {
+      accessToken: result.accessToken,
+      user: result.user,
+    };
+  }
 }
