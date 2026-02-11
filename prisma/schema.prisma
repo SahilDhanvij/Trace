@@ -6,12 +6,49 @@ datasource db {
   provider = "postgresql"
 }
 
+model Node {
+  id        String   @id @default(uuid())
+  userId    String
+  name      String 
+  latitude  Decimal  @db.Decimal(10, 8) 
+  longitude Decimal  @db.Decimal(11, 8) 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user      User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  edgesFrom Edge[] @relation("EdgeFrom")
+  edgesTo   Edge[] @relation("EdgeTo")
+
+  @@index([userId])
+  @@index([latitude, longitude])
+}
+
+model Edge {
+  id        String   @id @default(uuid())
+
+  fromId    String
+  toId      String
+  traveledAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  from Node @relation("EdgeFrom", fields: [fromId], references: [id], onDelete: Cascade)
+  to   Node @relation("EdgeTo", fields: [toId], references: [id], onDelete: Cascade)
+
+  @@index([fromId])
+  @@index([toId])
+  @@unique([fromId, toId, traveledAt])
+}
+
+
 model User {
   id            String         @id @default(uuid())
   email         String         @unique
   name          String?
   googleId      String?        @unique
   refreshTokens RefreshToken[]
+  nodes         Node[]
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
 }
