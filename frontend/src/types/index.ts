@@ -23,6 +23,13 @@ export interface Edge {
   updatedAt: string;
 }
 
+export interface GeoCodingResult {
+  name: string;
+  latitude: number;
+  longitude: number;
+  country: string;
+  admin1?: string;
+}
 
 export interface AuthResponse {
   accessToken: string;
