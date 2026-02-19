@@ -1,9 +1,9 @@
 "use client";
 
 import { api } from "@/lib/api";
-import { Node } from "@/types";
+import { GeoCodingResult, Node } from "@/types";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
 export default function MapPage() {
@@ -11,6 +11,8 @@ export default function MapPage() {
   const [nodes, setNodes] = useState<Node[]>([]);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<any>(null);
+  const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
+  const [connectingFromId, setConnectingFromId] = useState<string | null>(null);
 
   useEffect(() => {
     loadData();
@@ -43,6 +45,46 @@ export default function MapPage() {
     }
   };
 
+  const handleCitySelected = useCallback(async (result: GeoCodingResult) => {
+    try {
+      const newNode = await api.createNode({
+        name: result.name,
+        latitude: result.latitude,
+        longitude: result.longitude,
+      });
+      setNodes((prev) => [...prev, newNode]);
+      toast.success(`📍 ${result.name} added!`);
+    } catch (error: any) {
+      toast.error(error.message || "Failed to add city.");
+    }
+  }, []);
+
+  const handleNodeclick = useCallback(
+    async (node: Node) => {
+      if (connectingFromId) {
+        if (connectingFromId === node.id) {
+          setConnectingFromId(null);
+          return;
+        }
+        try {
+          // const newEdge = await api.createEdge(connectingFromId, node.id);
+          // setEdges((prev) => [...prev, newEdge]);
+          toast("Edge drawing ready — wire backend in Step 3!", { icon: "🔗" });
+        } catch (error: any) {
+          toast.error(error.message || "Failed to connect nodes.");
+        } finally {
+          setConnectingFromId(null);
+          setSelectedNodeId(node.id);
+        }
+      } else {
+        setSelectedNodeId((prev) => (prev === node.id ? null : node.id));
+      }
+    },
+    [connectingFromId],
+  );
+
+  
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -69,7 +111,6 @@ export default function MapPage() {
         </button>
       </div>
       {}
-
     </div>
   );
 }

@@ -9,48 +9,68 @@ datasource db {
 model Node {
   id        String   @id @default(uuid())
   userId    String
-  name      String 
-  latitude  Decimal  @db.Decimal(10, 8) 
-  longitude Decimal  @db.Decimal(11, 8) 
+  name      String
+  latitude  Decimal  @db.Decimal(10, 8)
+  longitude Decimal  @db.Decimal(11, 8)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  user      User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  edgesFrom Edge[] @relation("EdgeFrom")
-  edgesTo   Edge[] @relation("EdgeTo")
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  edgesFrom    Edge[]       @relation("EdgeFrom")
+  edgesTo      Edge[]       @relation("EdgeTo")
+  vaultEntries VaultEntry[]
 
   @@index([userId])
   @@index([latitude, longitude])
 }
 
 model Edge {
-  id        String   @id @default(uuid())
-
-  fromId    String
-  toId      String
+  id         String    @id @default(uuid())
+  userId     String
+  fromId     String
+  toId       String
   traveledAt DateTime?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
   from Node @relation("EdgeFrom", fields: [fromId], references: [id], onDelete: Cascade)
   to   Node @relation("EdgeTo", fields: [toId], references: [id], onDelete: Cascade)
 
+  @@unique([fromId, toId, traveledAt])
+  @@index([userId])
   @@index([fromId])
   @@index([toId])
-  @@unique([fromId, toId, traveledAt])
 }
 
+model VaultEntry {
+  id        String    @id @default(uuid())
+  nodeId    String
+  userId    String
+  caption   String?
+  photoUrl  String?
+  visitedAt DateTime?
+  createdAt DateTime  @default(now())
+
+  node Node @relation(fields: [nodeId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([nodeId])
+}
 
 model User {
   id            String         @id @default(uuid())
   email         String         @unique
   name          String?
   googleId      String?        @unique
+  homeNodeId    String?        @unique
   refreshTokens RefreshToken[]
   nodes         Node[]
+  edges         Edge[]
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
+  vaultEntries  VaultEntry[]
 }
 
 model RefreshToken {
