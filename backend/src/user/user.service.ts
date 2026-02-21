@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/common/prisma/prisma.service';
 import { OAuthDTO } from 'src/DTO/oAuthDTO';
 
@@ -24,6 +24,25 @@ export class UserService {
     async findById(userId : string){
         return this.prisma.user.findUnique({
             where : {id : userId}
+        });
+    }
+
+    async setHomeNode(userId : string, nodeId : string){
+        const node = await this.prisma.node.findFirst({
+            where : {id : nodeId, userId},
+        })
+        if(!node){
+            throw new NotFoundException('Node not found');
+        }
+        return this.prisma.user.update({
+            where : {id : userId},
+            data : {homeNodeId : nodeId},
+            select : {
+                id : true,
+                name : true,
+                email : true,
+                homeNodeId : true
+            }
         });
     }
     
