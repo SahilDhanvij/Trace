@@ -30,15 +30,14 @@ model Edge {
   fromId     String
   toId       String
   traveledAt DateTime?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
   from Node @relation("EdgeFrom", fields: [fromId], references: [id], onDelete: Cascade)
   to   Node @relation("EdgeTo", fields: [toId], references: [id], onDelete: Cascade)
 
-  @@unique([fromId, toId, traveledAt])
+  @@unique([userId, fromId, toId])
   @@index([userId])
   @@index([fromId])
   @@index([toId])
