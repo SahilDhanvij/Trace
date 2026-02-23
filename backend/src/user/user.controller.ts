@@ -10,7 +10,7 @@ export class UserController {
     return this.userService.findById(req.user.userId);
   }
 
-  @Patch()
+  @Patch('homeNode')
   setHomeNode(@Req() req, @Body('nodeId') nodeId: string) {
     return this.userService.setHomeNode(req.user.userId, nodeId);
   }

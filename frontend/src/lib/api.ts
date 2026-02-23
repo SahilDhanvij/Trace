@@ -57,13 +57,28 @@ export class ApiClient {
     });
   }
 
-  async getMe() {
-    return this.request<any>("/auth/me");
-  }
-
   async logout() {
     return this.request<{ success: boolean }>("/auth/logout", {
       method: "POST",
+    });
+  }
+
+  async getMe() {
+    return this.request<{
+      id: string;
+      email: string;
+      name?: string | null;
+      homeNodeId?: string | null;
+    }>("/user/me");
+  }
+
+  async setHomeNode(nodeId: string) {
+    return this.request<{
+      id: string;
+      homeNodeId?: string | null;
+    }>("/user/homeNode", {
+      method: "PATCH",
+      body: JSON.stringify({ nodeId }),
     });
   }
 
@@ -84,19 +99,41 @@ export class ApiClient {
     return this.request<any[]>(`/nodes${query}`);
   }
 
-  async createNode(data : {name : string, latitude: number, longitude: number}) {
-    return this.request<any>('/nodes',{
-      method: 'POST',
+  async createNode(data: {
+    name: string;
+    latitude: number;
+    longitude: number;
+  }) {
+    return this.request<any>("/nodes", {
+      method: "POST",
       body: JSON.stringify(data),
     });
   }
 
-  async deleteNode(id : string){
-    return this.request<any>(`/nodes/${id}`,{
-      method: 'DELETE',
+  async deleteNode(id: string) {
+    return this.request<any>(`/nodes/${id}`, {
+      method: "DELETE",
     });
   }
 
+  async getEdges() {
+    return this.request<any[]>("/edges");
+  }
+
+  async createEdge(fromId: string, toId: string, traveledAt?: string) {
+    {
+      return this.request<any>("/edges", {
+        method: "POST",
+        body: JSON.stringify({ fromId, toId, traveledAt }),
+      });
+    }
+  }
+
+  async deleteEdge(id: string) {
+    return this.request<any>(`/edges/${id}`, {
+      method: "DELETE",
+    });
+  }
 }
 
 export const api = new ApiClient();
