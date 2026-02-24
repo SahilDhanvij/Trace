@@ -126,6 +126,7 @@ export default function MapPage() {
           edges={edges}
           selectedNodeId={selectedNodeId}
           connectingFromId={null}
+          homeNodeId={homeNodeId} // ← add this
           onNodeClick={handleNodeClick}
         />
       </div>

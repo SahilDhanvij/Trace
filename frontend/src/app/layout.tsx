@@ -1,3 +1,4 @@
+import './globals.css';
 import { Providers } from './providers';
 
 export default function RootLayout({
@@ -6,8 +7,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html>
-      <body>
+    <html lang="en" className="h-full">
+      <body className="h-full overflow-hidden">
         <Providers>{children}</Providers>
       </body>
     </html>
