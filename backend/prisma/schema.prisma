@@ -7,13 +7,14 @@ datasource db {
 }
 
 model Node {
-  id        String   @id @default(uuid())
+  id        String    @id @default(uuid())
   userId    String
   name      String
-  latitude  Decimal  @db.Decimal(10, 8)
-  longitude Decimal  @db.Decimal(11, 8)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  latitude  Decimal   @db.Decimal(10, 8)
+  longitude Decimal   @db.Decimal(11, 8)
+  visitedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 
   user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   edgesFrom    Edge[]       @relation("EdgeFrom")
@@ -56,6 +57,7 @@ model VaultEntry {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([nodeId])
+  @@index([userId])
 }
 
 model User {

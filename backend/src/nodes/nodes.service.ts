@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { Decimal } from '@prisma/client/runtime/wasm-compiler-edge';
 import { PrismaService } from 'src/common/prisma/prisma.service';
 import { CreateNodeDTO } from 'src/DTO/create-nodeDTO';
@@ -19,7 +23,9 @@ export class NodesService {
       },
     });
     if (existingNode) {
-      throw new Error('Node with the same coordinates already exists');
+      throw new ConflictException(
+        'Node with the same coordinates already exists',
+      );
     }
     const node = await this.prisma.node.create({
       data: {
@@ -67,12 +73,13 @@ export class NodesService {
   }
 
   async deleteNode(userId: string, nodeId: string) {
-    const node = await this.getNodeById(userId, nodeId);
-    await this.prisma.node.delete({
+    const result = await this.prisma.node.deleteMany({
       where: {
         id: nodeId,
+        userId: userId,
       },
     });
+    if (result.count === 0) throw new NotFoundException('Node not found');
     return { success: true };
   }
 }
