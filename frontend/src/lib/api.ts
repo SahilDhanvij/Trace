@@ -26,12 +26,28 @@ export class ApiClient {
     }
   }
 
+  private async tryRefreshToken(): Promise<boolean> {
+    try {
+      const res = await fetch(`${this.baseUrl}/auth/refresh`, {
+        method: "POST",
+        credentials: "include",
+      });
+
+      if (!res.ok) return false;
+
+      const data = await res.json();
+      this.setAccessToken(data.accessToken);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
   private async request<T>(
     endpoint: string,
     options: RequestInit = {},
   ): Promise<T> {
     const headers = new Headers(options.headers);
-
     headers.set("Content-Type", "application/json");
 
     if (this.accessToken) {
@@ -43,13 +59,25 @@ export class ApiClient {
       headers,
       credentials: "include",
     });
+
+    if (response.status === 401) {
+      const refreshed = await this.tryRefreshToken();
+
+      if (refreshed) {
+        return this.request(endpoint, options);
+      }
+
+      this.clearAccessToken();
+      throw new Error("Session expired. Please log in again.");
+    }
+
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.message || "API request failed");
+      throw new Error((errorData as any).message || "API request failed");
     }
+
     return response.json();
   }
-
   async loginWithGoogle(idToken: string) {
     return this.request<{ accessToken: string }>("/auth/google", {
       method: "POST",
