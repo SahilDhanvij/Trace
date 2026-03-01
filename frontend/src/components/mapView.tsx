@@ -188,17 +188,17 @@ export default function MapView({
           const isHome = n.id === hId;
           const isSel = n.id === selId;
           const col = isSel ? 0x38bdf8 : 0xffc234;
-          const sz = isHome ? 0.025 : 0.018;
+          const sz = isHome ? 0.018 : 0.012;
           const pos = ll(Number(n.latitude), Number(n.longitude), 1.016);
           const g = new T.Group();
           g.position.copy(pos);
           // core
           g.add(new T.Mesh(new T.SphereGeometry(sz, 12, 8), new T.MeshBasicMaterial({ color: col, transparent: true, blending: T.AdditiveBlending, depthWrite: false })));
           // glow
-          g.add(new T.Mesh(new T.SphereGeometry(sz*2.5, 12, 8), new T.MeshBasicMaterial({ color: col, transparent: true, opacity: 0.25, blending: T.AdditiveBlending, depthWrite: false })));
+          g.add(new T.Mesh(new T.SphereGeometry(sz * 1.8, 12, 8), new T.MeshBasicMaterial({ color: col, transparent: true, opacity: 0.2, blending: T.AdditiveBlending, depthWrite: false })));
           // pulse
-          const pm = new T.MeshBasicMaterial({ color: col, transparent: true, opacity: 0.08, blending: T.AdditiveBlending, depthWrite: false });
-          const pulse = new T.Mesh(new T.SphereGeometry(sz*5, 12, 8), pm);
+          const pm = new T.MeshBasicMaterial({ color: col, transparent: true, opacity: 0.06, blending: T.AdditiveBlending, depthWrite: false });
+          const pulse = new T.Mesh(new T.SphereGeometry(sz * 2.8, 12, 8), pm);
           g.add(pulse);
           nodeGrp.add(g);
           nObjs.push({ group: g, pulse, pm, pos, id: n.id, home: isHome });
