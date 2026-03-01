@@ -65,6 +65,7 @@ model User {
   email         String         @unique
   name          String?
   googleId      String?        @unique
+  passwordHash  String?
   homeNodeId    String?        @unique
   refreshTokens RefreshToken[]
   nodes         Node[]

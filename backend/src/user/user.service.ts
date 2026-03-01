@@ -27,6 +27,18 @@ export class UserService {
         });
     }
 
+    async findByEmail(email: string) {
+        return this.prisma.user.findUnique({
+            where: { email },
+        });
+    }
+
+    async createWithPassword(name: string, email: string, passwordHash: string) {
+        return this.prisma.user.create({
+            data: { name, email, passwordHash },
+        });
+    }
+
     async setHomeNode(userId : string, nodeId : string){
         const node = await this.prisma.node.findFirst({
             where : {id : nodeId, userId},

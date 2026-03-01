@@ -79,9 +79,23 @@ export class ApiClient {
     return response.json();
   }
   async loginWithGoogle(idToken: string) {
-    return this.request<{ accessToken: string }>("/auth/google", {
+    return this.request<{ accessToken: string; user: { id: string; email: string; name?: string | null } }>("/auth/google", {
       method: "POST",
       body: JSON.stringify({ idToken }),
+    });
+  }
+
+  async register(name: string, email: string, password: string) {
+    return this.request<{ accessToken: string; user: { id: string; email: string; name?: string | null } }>("/auth/register", {
+      method: "POST",
+      body: JSON.stringify({ name, email, password }),
+    });
+  }
+
+  async loginWithEmail(email: string, password: string) {
+    return this.request<{ accessToken: string; user: { id: string; email: string; name?: string | null } }>("/auth/login", {
+      method: "POST",
+      body: JSON.stringify({ email, password }),
     });
   }
 

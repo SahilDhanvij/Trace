@@ -1,12 +1,20 @@
 import { createHash } from 'crypto';
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  UnauthorizedException,
+  ConflictException,
+} from '@nestjs/common';
+import { hash, compare } from 'bcryptjs';
 import { googleService } from './google/googleService';
 import { UserService } from 'src/user/user.service';
 import { JwtService } from './jwt/jwt.service';
 import { PrismaService } from 'src/common/prisma/prisma.service';
 import { RefreshTokenService } from './refresh-token.service';
+import { RegisterDto } from 'src/DTO/registerDTO';
+import { LoginDto } from 'src/DTO/loginDTO';
 
 const REFRESH_TOKEN_EXPIRY_DAYS = 7;
+const BCRYPT_ROUNDS = 12;
 
 @Injectable()
 export class AuthService {
@@ -50,6 +58,68 @@ export class AuthService {
 
   async logOut(refreshToken: string) {
     await this.refreshTokenService.revokeRefreshToken(refreshToken);
+  }
+
+  async register(dto: RegisterDto) {
+    const existing = await this.userService.findByEmail(dto.email);
+    if (existing) {
+      throw new ConflictException('An account with this email already exists');
+    }
+
+    const passwordHash = await hash(dto.password, BCRYPT_ROUNDS);
+    const user = await this.userService.createWithPassword(
+      dto.name,
+      dto.email,
+      passwordHash,
+    );
+
+    const accessToken = this.jwtService.generateAccessToken(user);
+    const refreshToken = await this.refreshTokenService.createRefreshToken(
+      user.id,
+    );
+
+    return {
+      accessToken,
+      refreshToken,
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+      },
+    };
+  }
+
+  async loginWithEmail(dto: LoginDto) {
+    const user = await this.userService.findByEmail(dto.email);
+    if (!user) {
+      throw new UnauthorizedException('Invalid email or password');
+    }
+
+    if (!user.passwordHash) {
+      throw new UnauthorizedException(
+        'This account uses Google sign-in. Please log in with Google.',
+      );
+    }
+
+    const valid = await compare(dto.password, user.passwordHash);
+    if (!valid) {
+      throw new UnauthorizedException('Invalid email or password');
+    }
+
+    const accessToken = this.jwtService.generateAccessToken(user);
+    const refreshToken = await this.refreshTokenService.createRefreshToken(
+      user.id,
+    );
+
+    return {
+      accessToken,
+      refreshToken,
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+      },
+    };
   }
 
   //not needed for prod

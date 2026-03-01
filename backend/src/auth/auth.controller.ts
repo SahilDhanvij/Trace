@@ -12,6 +12,8 @@ import { AuthService } from './auth.service';
 
 import { setRefreshTokenCookie, clearRefreshTokenCookie } from './cookie.util';
 import { GoogleDto } from 'src/DTO/googleDTO';
+import { RegisterDto } from 'src/DTO/registerDTO';
+import { LoginDto } from 'src/DTO/loginDTO';
 import { Throttle } from '@nestjs/throttler';
 import { Public } from 'src/common/decorators/public.decorator';
 
@@ -27,6 +29,36 @@ export class AuthController {
     @Res({ passthrough: true }) res: express.Response,
   ) {
     const result = await this.authService.loginWithGoogle(dto.idToken);
+    setRefreshTokenCookie(res, result.refreshToken);
+    return {
+      accessToken: result.accessToken,
+      user: result.user,
+    };
+  }
+
+  @Public()
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
+  @Post('register')
+  async register(
+    @Body() dto: RegisterDto,
+    @Res({ passthrough: true }) res: express.Response,
+  ) {
+    const result = await this.authService.register(dto);
+    setRefreshTokenCookie(res, result.refreshToken);
+    return {
+      accessToken: result.accessToken,
+      user: result.user,
+    };
+  }
+
+  @Public()
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
+  @Post('login')
+  async loginWithEmail(
+    @Body() dto: LoginDto,
+    @Res({ passthrough: true }) res: express.Response,
+  ) {
+    const result = await this.authService.loginWithEmail(dto);
     setRefreshTokenCookie(res, result.refreshToken);
     return {
       accessToken: result.accessToken,
