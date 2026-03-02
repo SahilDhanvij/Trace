@@ -1,7 +1,6 @@
 "use client";
 
 import { GeoCodingResult } from "@/types";
-import { clear } from "console";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 interface CitySearchProps {
@@ -16,6 +15,7 @@ export default function CitySearch(props: CitySearchProps) {
   const [query, setQuery] = useState("");
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const [focused, setFocused] = useState(false);
 
   const search = useCallback(async (q: string) => {
     if (q.trim().length < 2) {
@@ -59,6 +59,7 @@ export default function CitySearch(props: CitySearchProps) {
         !containerRef.current.contains(e.target as Node)
       ) {
         setOpen(false);
+        setFocused(false);
       }
     };
     document.addEventListener("mousedown", handler);
@@ -72,34 +73,53 @@ export default function CitySearch(props: CitySearchProps) {
     props.onSelect(result);
   };
 
+  const expanded = focused || query.length > 0;
+
   return (
-    <div ref={containerRef} className="relative w-full max-w-xs">
+    <div ref={containerRef} className="relative">
       <div
-        className="flex items-center gap-2 rounded-xl px-3 py-2.5"
+        className="flex items-center gap-2 transition-all duration-300 ease-out"
         style={{
-          background: "rgba(10,10,30,0.9)",
-          border: "1px solid rgba(167,139,250,0.3)",
-          backdropFilter: "blur(12px)",
-          boxShadow: "0 4px 24px rgba(0,0,0,0.5)",
+          width: expanded ? 280 : 44,
+          height: 44,
+          borderRadius: expanded ? 14 : 22,
+          background: "rgba(8, 8, 20, 0.75)",
+          border: `1px solid ${expanded ? "rgba(200, 160, 32, 0.25)" : "rgba(255,255,255,0.08)"}`,
+          backdropFilter: "blur(20px)",
+          WebkitBackdropFilter: "blur(20px)",
+          boxShadow: expanded
+            ? "0 8px 32px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.04)"
+            : "0 4px 16px rgba(0,0,0,0.3)",
+          padding: expanded ? "0 14px" : "0",
+          justifyContent: expanded ? "flex-start" : "center",
+          cursor: expanded ? "text" : "pointer",
+          overflow: "hidden",
+        }}
+        onClick={() => {
+          if (!expanded) {
+            setFocused(true);
+            setTimeout(() => inputRef.current?.focus(), 50);
+          }
         }}
       >
         {loading ? (
           <div
             className="w-4 h-4 rounded-full border-2 border-transparent flex-shrink-0 animate-spin"
-            style={{ borderTopColor: "#a78bfa" }}
+            style={{ borderTopColor: "rgba(200, 160, 32, 0.6)" }}
           />
         ) : (
           <svg
-            width="15"
-            height="15"
+            width="16"
+            height="16"
             viewBox="0 0 24 24"
             fill="none"
-            stroke="rgba(167,139,250,0.7)"
+            stroke="rgba(200, 160, 32, 0.5)"
             strokeWidth="2"
+            strokeLinecap="round"
             className="flex-shrink-0"
           >
-            <circle cx="11" cy="11" r="8" />
-            <path d="m21 21-4.35-4.35" />
+            <circle cx="11" cy="11" r="7" />
+            <path d="m20 20-3.5-3.5" />
           </svg>
         )}
         <input
@@ -107,11 +127,23 @@ export default function CitySearch(props: CitySearchProps) {
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          onFocus={() => results.length > 0 && setOpen(true)}
-          placeholder="Search a city..."
-          disabled= {props.disabled}
-          className="flex-1 bg-transparent outline-none text-sm min-w-0"
-          style={{ color: "#e0e0ff" }}
+          onFocus={() => {
+            setFocused(true);
+            if (results.length > 0) setOpen(true);
+          }}
+          onBlur={() => {
+            if (!query) setTimeout(() => setFocused(false), 200);
+          }}
+          placeholder="Search a city…"
+          disabled={props.disabled}
+          className="flex-1 bg-transparent outline-none text-[13px] min-w-0 tracking-wide"
+          style={{
+            color: "rgba(255,255,255,0.85)",
+            fontFamily: "'Inter', system-ui, sans-serif",
+            opacity: expanded ? 1 : 0,
+            width: expanded ? "auto" : 0,
+            transition: "opacity 0.2s",
+          }}
         />
         {query && (
           <button
@@ -120,70 +152,73 @@ export default function CitySearch(props: CitySearchProps) {
               setResults([]);
               setOpen(false);
             }}
-            style={{ color: "rgba(255,255,255,0.35)" }}
+            className="flex-shrink-0 p-0.5 rounded-full transition-colors"
+            style={{ color: "rgba(255,255,255,0.3)" }}
+            onMouseEnter={(e) => (e.currentTarget.style.color = "rgba(255,255,255,0.6)")}
+            onMouseLeave={(e) => (e.currentTarget.style.color = "rgba(255,255,255,0.3)")}
           >
-            <svg
-              width="14"
-              height="14"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-            >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
               <path d="M18 6L6 18M6 6l12 12" />
             </svg>
           </button>
         )}
       </div>
 
-      {/* Dropdown */}
       {open && results.length > 0 && (
         <div
-          className="absolute top-full left-0 right-0 mt-1.5 rounded-xl overflow-hidden z-50"
+          className="absolute top-full right-0 mt-2 overflow-hidden z-50"
           style={{
-            background: "rgba(10,10,30,0.97)",
-            border: "1px solid rgba(167,139,250,0.2)",
-            boxShadow: "0 8px 32px rgba(0,0,0,0.6)",
+            width: 300,
+            borderRadius: 14,
+            background: "rgba(8, 8, 20, 0.92)",
+            border: "1px solid rgba(200, 160, 32, 0.12)",
+            backdropFilter: "blur(24px)",
+            WebkitBackdropFilter: "blur(24px)",
+            boxShadow: "0 12px 48px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.04)",
           }}
         >
+          <div
+            className="px-3.5 py-2"
+            style={{ borderBottom: "1px solid rgba(255,255,255,0.04)" }}
+          >
+            <span
+              className="text-[9px] uppercase tracking-[0.2em]"
+              style={{ color: "rgba(200, 160, 32, 0.35)" }}
+            >
+              Results
+            </span>
+          </div>
           {results.map((r, i) => (
             <button
               key={i}
               onClick={() => handleSelect(r)}
-              className="w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors"
+              className="w-full flex items-center gap-3 px-3.5 py-2.5 text-left transition-all duration-150"
               style={{
                 borderBottom:
                   i < results.length - 1
-                    ? "1px solid rgba(255,255,255,0.06)"
+                    ? "1px solid rgba(255,255,255,0.03)"
                     : "none",
               }}
-              onMouseEnter={(e) =>
-                (e.currentTarget.style.background = "rgba(167,139,250,0.1)")
-              }
-              onMouseLeave={(e) =>
-                (e.currentTarget.style.background = "transparent")
-              }
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = "rgba(200, 160, 32, 0.06)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = "transparent";
+              }}
             >
-              <svg
-                width="12"
-                height="12"
-                viewBox="0 0 24 24"
-                fill="#a78bfa"
-                className="flex-shrink-0 mt-0.5"
+              <div
+                className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0"
+                style={{ background: "rgba(200, 160, 32, 0.08)" }}
               >
-                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" />
-              </svg>
-              <div className="min-w-0">
-                <span
-                  className="block text-sm font-medium truncate"
-                  style={{ color: "#e0e0ff" }}
-                >
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="rgba(200, 160, 32, 0.6)" className="flex-shrink-0">
+                  <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" />
+                </svg>
+              </div>
+              <div className="min-w-0 flex-1">
+                <span className="block text-[13px] font-medium truncate" style={{ color: "rgba(255,255,255,0.85)" }}>
                   {r.name}
                 </span>
-                <span
-                  className="block text-xs truncate"
-                  style={{ color: "rgba(255,255,255,0.4)" }}
-                >
+                <span className="block text-[11px] truncate" style={{ color: "rgba(255,255,255,0.3)" }}>
                   {[r.admin1, r.country].filter(Boolean).join(", ")}
                 </span>
               </div>

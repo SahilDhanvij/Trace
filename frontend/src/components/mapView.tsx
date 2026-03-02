@@ -24,6 +24,8 @@ export default function MapView({
 }: MapViewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const internals = useRef<any>(null);
+  const latestProps = useRef({ nodes, edges, selectedNodeId, homeNodeId });
+  latestProps.current = { nodes, edges, selectedNodeId, homeNodeId };
 
   // ── Mount scene once ──────────────────────────────────────────
   useEffect(() => {
@@ -40,7 +42,7 @@ export default function MapView({
       const ren = new T.WebGLRenderer({ antialias: true });
       ren.setSize(W, H);
       ren.setPixelRatio(Math.min(devicePixelRatio, 2));
-      ren.setClearColor(0x000308);
+      ren.setClearColor(0x020209);
       ren.domElement.style.display = "block";
       el.appendChild(ren.domElement);
 
@@ -56,26 +58,158 @@ export default function MapView({
       };
       window.addEventListener("resize", onRz);
 
-      // ── Stars ─────────────────────────────────────────────────
+      // ── Stars: dense realistic field with color + twinkling ─────
+      let starMatRef: THREE.ShaderMaterial | null = null;
       (() => {
-        const N = 8000, p = new Float32Array(N * 3), s = new Float32Array(N);
+        const N = 18000;
+        const p = new Float32Array(N * 3);
+        const s = new Float32Array(N);
+        const c = new Float32Array(N * 3);
+        const tw = new Float32Array(N);
         for (let i = 0; i < N; i++) {
           const th = Math.random() * Math.PI * 2;
           const ph = Math.acos(2 * Math.random() - 1);
-          const r = 80 + Math.random() * 80;
+          const r = 80 + Math.random() * 100;
           p[i*3] = r*Math.sin(ph)*Math.cos(th);
           p[i*3+1] = r*Math.sin(ph)*Math.sin(th);
           p[i*3+2] = r*Math.cos(ph);
-          s[i] = Math.random() * 1.5 + 0.3;
+
+          const brightness = Math.pow(Math.random(), 3.0);
+          s[i] = brightness * 2.5 + 0.15;
+
+          // star color temperature: blue-white, white, yellow, orange
+          const temp = Math.random();
+          if (temp < 0.15) { c[i*3]=0.7; c[i*3+1]=0.8; c[i*3+2]=1.0; }
+          else if (temp < 0.6) { c[i*3]=0.95; c[i*3+1]=0.95; c[i*3+2]=1.0; }
+          else if (temp < 0.85) { c[i*3]=1.0; c[i*3+1]=0.92; c[i*3+2]=0.75; }
+          else { c[i*3]=1.0; c[i*3+1]=0.78; c[i*3+2]=0.55; }
+
+          tw[i] = Math.random() * 6.28;
         }
         const g = new T.BufferGeometry();
         g.setAttribute("position", new T.BufferAttribute(p, 3));
         g.setAttribute("size", new T.BufferAttribute(s, 1));
-        scene.add(new T.Points(g, new T.ShaderMaterial({
-          vertexShader: `attribute float size;void main(){vec4 mv=modelViewMatrix*vec4(position,1.);gl_PointSize=size*(200./-mv.z);gl_Position=projectionMatrix*mv;}`,
-          fragmentShader: `void main(){float d=length(gl_PointCoord-.5)*2.;if(d>1.)discard;gl_FragColor=vec4(.85,.9,1.,(1.-d*d)*.7);}`,
+        g.setAttribute("color", new T.BufferAttribute(c, 3));
+        g.setAttribute("twinkle", new T.BufferAttribute(tw, 1));
+        const starMat = new T.ShaderMaterial({
+          uniforms: { uTime: { value: 0 } },
+          vertexShader: `
+            attribute float size;
+            attribute vec3 color;
+            attribute float twinkle;
+            varying vec3 vC;
+            varying float vTw;
+            uniform float uTime;
+            void main(){
+              vC = color;
+              vTw = twinkle;
+              vec4 mv = modelViewMatrix * vec4(position, 1.);
+              float tw = 0.7 + 0.3 * sin(uTime * 1.2 + twinkle);
+              gl_PointSize = size * tw * (180. / -mv.z);
+              gl_Position = projectionMatrix * mv;
+            }`,
+          fragmentShader: `
+            varying vec3 vC;
+            void main(){
+              float d = length(gl_PointCoord - .5) * 2.;
+              if(d > 1.) discard;
+              float core = 1. - smoothstep(0., 0.15, d);
+              float glow = exp(-d * d * 3.5);
+              float a = core * 0.9 + glow * 0.5;
+              vec3 col = vC * (core + glow * 0.6);
+              gl_FragColor = vec4(col, a);
+            }`,
           transparent: true, blending: T.AdditiveBlending, depthWrite: false,
-        })));
+        });
+        scene.add(new T.Points(g, starMat));
+        starMatRef = starMat;
+      })();
+
+      // ── Distant planets ─────────────────────────────────────────
+      (() => {
+        // Saturn-like ringed planet
+        const saturnBody = new T.Mesh(
+          new T.SphereGeometry(2.5, 32, 24),
+          new T.ShaderMaterial({
+            vertexShader: `varying vec3 vN,vW;varying vec2 vUv;void main(){vN=normalize(normalMatrix*normal);vW=(modelMatrix*vec4(position,1.)).xyz;vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,
+            fragmentShader: `
+              varying vec3 vN,vW;varying vec2 vUv;
+              void main(){
+                float light=max(dot(vN,normalize(vec3(1.,0.5,0.3))),0.);
+                vec3 base=mix(vec3(0.6,0.5,0.3),vec3(0.75,0.65,0.45),vUv.y+sin(vUv.y*30.)*0.02);
+                vec3 col=base*(0.15+light*0.6);
+                float rim=1.-abs(dot(normalize(cameraPosition-vW),vN));
+                col+=vec3(0.3,0.25,0.15)*pow(rim,3.)*0.3;
+                gl_FragColor=vec4(col,0.85);
+              }`,
+            transparent: true, depthWrite: false,
+          })
+        );
+        saturnBody.position.set(-55, 20, -90);
+        scene.add(saturnBody);
+
+        // Saturn's ring
+        const ringGeo = new T.RingGeometry(3.5, 5.5, 64);
+        const ringMat = new T.ShaderMaterial({
+          side: T.DoubleSide,
+          transparent: true,
+          depthWrite: false,
+          vertexShader: `varying vec2 vUv;void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,
+          fragmentShader: `
+            varying vec2 vUv;
+            void main(){
+              float r=length(vUv-0.5)*2.;
+              float ring=smoothstep(0.0,0.05,r)*smoothstep(1.,0.95,r);
+              float bands=0.6+0.4*sin(r*40.)*sin(r*15.);
+              vec3 col=vec3(0.65,0.55,0.4)*bands;
+              gl_FragColor=vec4(col*0.4, ring*0.35*bands);
+            }`
+        });
+        const ring = new T.Mesh(ringGeo, ringMat);
+        ring.position.copy(saturnBody.position);
+        ring.rotation.x = -0.8;
+        ring.rotation.z = 0.15;
+        scene.add(ring);
+
+        // Reddish distant planet (Mars-like)
+        const mars = new T.Mesh(
+          new T.SphereGeometry(1.2, 24, 16),
+          new T.ShaderMaterial({
+            vertexShader: `varying vec3 vN,vW;void main(){vN=normalize(normalMatrix*normal);vW=(modelMatrix*vec4(position,1.)).xyz;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,
+            fragmentShader: `
+              varying vec3 vN,vW;
+              void main(){
+                float light=max(dot(vN,normalize(vec3(-0.5,0.8,0.3))),0.);
+                vec3 col=vec3(0.6,0.25,0.12)*(0.12+light*0.55);
+                float rim=1.-abs(dot(normalize(cameraPosition-vW),vN));
+                col+=vec3(0.4,0.15,0.05)*pow(rim,3.)*0.25;
+                gl_FragColor=vec4(col,0.8);
+              }`,
+            transparent: true, depthWrite: false,
+          })
+        );
+        mars.position.set(70, -15, -60);
+        scene.add(mars);
+
+        // Small bluish ice planet
+        const ice = new T.Mesh(
+          new T.SphereGeometry(0.8, 20, 14),
+          new T.ShaderMaterial({
+            vertexShader: `varying vec3 vN,vW;void main(){vN=normalize(normalMatrix*normal);vW=(modelMatrix*vec4(position,1.)).xyz;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,
+            fragmentShader: `
+              varying vec3 vN,vW;
+              void main(){
+                float light=max(dot(vN,normalize(vec3(0.3,0.6,-0.5))),0.);
+                vec3 col=vec3(0.3,0.5,0.7)*(0.1+light*0.5);
+                float rim=1.-abs(dot(normalize(cameraPosition-vW),vN));
+                col+=vec3(0.2,0.35,0.6)*pow(rim,2.5)*0.3;
+                gl_FragColor=vec4(col,0.7);
+              }`,
+            transparent: true, depthWrite: false,
+          })
+        );
+        ice.position.set(40, 35, -100);
+        scene.add(ice);
       })();
 
       // ── Globe ─────────────────────────────────────────────────
@@ -173,7 +307,7 @@ export default function MapView({
       let aObjs: AObj[] = [];
       let curNodes: Node[] = [];
 
-      const dotGeo = new T.SphereGeometry(0.008, 8, 6);
+      const dotGeo = new T.SphereGeometry(0.006, 6, 4);
 
       function rebuild(ns: Node[], es: Edge[], selId: string | null, hId: string | null) {
         // clear
@@ -220,11 +354,14 @@ export default function MapView({
             new T.BufferGeometry().setFromPoints(pts),
             new T.LineBasicMaterial({ color: 0xffc234, transparent: true, opacity: 0.55, blending: T.AdditiveBlending, depthWrite: false })
           ));
-          // travelling dot
-          const dm = new T.MeshBasicMaterial({ color: 0xffc234, transparent: true, blending: T.AdditiveBlending, depthWrite: false });
-          const dot = new T.Mesh(dotGeo, dm);
-          arcGrp.add(dot);
-          aObjs.push({ dot, dm, from, mid, to, t: Math.random(), spd: 0.0007 + Math.random() * 0.0004 });
+          // travelling dots (2–3 per arc)
+          const dotCount = 2 + Math.floor(Math.random() * 2);
+          for (let d = 0; d < dotCount; d++) {
+            const dm = new T.MeshBasicMaterial({ color: 0xffffff, transparent: true, blending: T.AdditiveBlending, depthWrite: false });
+            const dot = new T.Mesh(dotGeo, dm);
+            arcGrp.add(dot);
+            aObjs.push({ dot, dm, from, mid, to, t: d / dotCount + Math.random() * 0.15, spd: 0.0004 + Math.random() * 0.0003 });
+          }
         });
       }
 
@@ -247,10 +384,10 @@ export default function MapView({
         trx = Math.max(-1.3, Math.min(1.3, trx));
         lx = e.clientX; ly = e.clientY;
       });
-      cv.addEventListener("wheel", e => { tzm = Math.max(1.8, Math.min(7, tzm + e.deltaY * 0.003)); }, { passive: true });
-      cv.addEventListener("touchstart", e => { if (e.touches.length === 1) { drag = true; lx = e.touches[0].clientX; ly = e.touches[0].clientY; autoR = false; } }, { passive: true });
+      cv.addEventListener("wheel", (e: WheelEvent) => { tzm = Math.max(1.8, Math.min(7, tzm + e.deltaY * 0.003)); }, { passive: true });
+      cv.addEventListener("touchstart", (e: TouchEvent) => { if (e.touches.length === 1) { drag = true; lx = e.touches[0].clientX; ly = e.touches[0].clientY; autoR = false; } }, { passive: true });
       cv.addEventListener("touchend", () => { drag = false; setTimeout(() => autoR = true, 2800); });
-      cv.addEventListener("touchmove", e => { if (!drag || e.touches.length !== 1) return; tryy += (e.touches[0].clientX - lx) * 0.006; trx += (e.touches[0].clientY - ly) * 0.004; trx = Math.max(-1.3, Math.min(1.3, trx)); lx = e.touches[0].clientX; ly = e.touches[0].clientY; }, { passive: true });
+      cv.addEventListener("touchmove", (e: TouchEvent) => { if (!drag || e.touches.length !== 1) return; tryy += (e.touches[0].clientX - lx) * 0.006; trx += (e.touches[0].clientY - ly) * 0.004; trx = Math.max(-1.3, Math.min(1.3, trx)); lx = e.touches[0].clientX; ly = e.touches[0].clientY; }, { passive: true });
 
       // ── Tooltip ────────────────────────────────────────────────
       const tip = document.createElement("div");
@@ -297,18 +434,25 @@ export default function MapView({
         globe.rotation.y = ry;
         cam.position.z = zm;
         (earth.material as any).uniforms.uTime.value = t;
+        if (starMatRef) starMatRef.uniforms.uTime.value = t;
 
-        // arc dots
+        // scale nodes/arcs relative to zoom so close cities don't blob together
+        const REF_ZM = 4.5;
+        const nodeScale = zm / REF_ZM;
+        const arcDotScale = zm / REF_ZM;
+
+        // arc dots — subtle light pulse
         aObjs.forEach(a => {
           a.t = (a.t + a.spd) % 1;
           const fade = Math.sin(a.t * Math.PI);
           a.dot.position.copy(bez(a.from, a.mid, a.to, a.t));
-          a.dot.scale.setScalar(fade * 1.5 + 0.5);
-          a.dm.opacity = fade * 0.9;
+          a.dot.scale.setScalar((fade * 0.6 + 0.4) * arcDotScale);
+          a.dm.opacity = fade * 0.35;
         });
 
-        // node pulse
+        // node pulse + zoom-based scaling
         nObjs.forEach((nd, i) => {
+          nd.group.scale.setScalar(nodeScale);
           const pv = nd.home ? 0.8 + 0.3 * Math.sin(t * 2.2) : 0.8 + 0.3 * Math.sin(t * 2.2 + i * 0.7);
           nd.pulse.scale.setScalar(pv);
           nd.pm.opacity = (nd.home ? 0.1 : 0.08) * (2 - pv);
@@ -355,6 +499,9 @@ export default function MapView({
           tip.remove();
         },
       };
+
+      const p = latestProps.current;
+      rebuild(p.nodes, p.edges, p.selectedNodeId, p.homeNodeId);
     });
 
     return () => {
@@ -370,6 +517,6 @@ export default function MapView({
   }, [nodes, edges, selectedNodeId, connectingFromId, homeNodeId]);
 
   return (
-    <div ref={containerRef} className="w-full h-full" style={{ background: "#000308" }} />
+    <div ref={containerRef} className="w-full h-full" style={{ background: "#020209" }} />
   );
 }

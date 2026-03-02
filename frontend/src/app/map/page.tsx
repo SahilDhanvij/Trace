@@ -131,68 +131,83 @@ export default function MapPage() {
         />
       </div>
 
-      {/* Top-left: brand */}
-      <div className="absolute top-5 left-6 z-10 pointer-events-none">
+      {/* Top bar */}
+      <div className="absolute top-0 left-0 right-0 z-10 flex items-start justify-between px-6 pt-5">
+        {/* Left: brand */}
         <div
-          className="text-xs font-mono tracking-widest"
+          className="text-[11px] font-medium tracking-[0.35em] pointer-events-none"
           style={{
-            color: "#c8a020",
-            textShadow: "0 0 20px rgba(200,160,32,0.9)",
+            color: "rgba(200,160,32,0.8)",
+            fontFamily: "'Inter', system-ui, sans-serif",
           }}
         >
-          T R A C E
+          TRACE
         </div>
-        {homeNode && (
-          <div
-            className="text-xs mt-1 font-mono"
-            style={{ color: "rgba(200,160,32,0.45)", letterSpacing: "3px" }}
-          >
-            ⌂ {homeNode.name}
-          </div>
-        )}
-        <div
-          className="text-xs mt-0.5 font-mono"
-          style={{ color: "rgba(255,255,255,0.2)", letterSpacing: "2px" }}
-        >
-          {edges.length} DESTINATIONS
-        </div>
-      </div>
 
-      {/* Top-right: search + buttons */}
-      <div className="absolute top-5 right-6 z-10 flex flex-col items-end gap-3">
-        <CitySearch onSelect={handleCitySelected} />
-        <div className="flex gap-2">
+        {/* Right: search + actions */}
+        <div className="flex items-center gap-2">
+          <CitySearch onSelect={handleCitySelected} />
           <button
             onClick={() => setShowHomeModal(true)}
-            className="text-xs font-mono px-3 py-1.5 rounded-lg transition-opacity hover:opacity-80"
+            className="group flex items-center justify-center transition-all duration-200"
             style={{
-              background: "rgba(10,10,30,0.8)",
-              border: "1px solid rgba(200,160,32,0.3)",
-              color: "rgba(200,160,32,0.7)",
-              backdropFilter: "blur(12px)",
+              width: 44,
+              height: 44,
+              borderRadius: 22,
+              background: "rgba(8, 8, 20, 0.75)",
+              border: "1px solid rgba(255,255,255,0.08)",
+              backdropFilter: "blur(20px)",
+              WebkitBackdropFilter: "blur(20px)",
             }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.borderColor = "rgba(200,160,32,0.25)";
+              e.currentTarget.style.background = "rgba(200,160,32,0.06)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)";
+              e.currentTarget.style.background = "rgba(8, 8, 20, 0.75)";
+            }}
+            title="Change home city"
           >
-            ⌂ HOME
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(200,160,32,0.5)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-4 0a1 1 0 01-1-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 01-1 1" />
+            </svg>
           </button>
           <button
             onClick={handleLogout}
-            className="text-xs font-mono px-3 py-1.5 rounded-lg transition-opacity hover:opacity-80"
+            className="flex items-center justify-center transition-all duration-200"
             style={{
-              background: "rgba(10,10,30,0.8)",
-              border: "1px solid rgba(255,255,255,0.1)",
-              color: "rgba(255,255,255,0.35)",
-              backdropFilter: "blur(12px)",
+              width: 44,
+              height: 44,
+              borderRadius: 22,
+              background: "rgba(8, 8, 20, 0.75)",
+              border: "1px solid rgba(255,255,255,0.08)",
+              backdropFilter: "blur(20px)",
+              WebkitBackdropFilter: "blur(20px)",
             }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.borderColor = "rgba(255,80,80,0.25)";
+              e.currentTarget.style.background = "rgba(255,80,80,0.06)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)";
+              e.currentTarget.style.background = "rgba(8, 8, 20, 0.75)";
+            }}
+            title="Logout"
           >
-            LOGOUT
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4" />
+              <polyline points="16 17 21 12 16 7" />
+              <line x1="21" y1="12" x2="9" y2="12" />
+            </svg>
           </button>
         </div>
       </div>
 
       {!showHomeModal && (
         <div
-          className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10 text-xs font-mono pointer-events-none"
-          style={{ color: "rgba(255,255,255,0.15)", letterSpacing: "3px" }}
+          className="absolute bottom-5 left-1/2 -translate-x-1/2 z-10 pointer-events-none text-[10px] tracking-[0.2em]"
+          style={{ color: "rgba(255,255,255,0.1)", fontFamily: "'Inter', system-ui, sans-serif" }}
         >
           DRAG TO ROTATE · SCROLL TO ZOOM
         </div>

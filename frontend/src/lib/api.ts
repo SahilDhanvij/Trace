@@ -26,21 +26,31 @@ export class ApiClient {
     }
   }
 
+  private refreshPromise: Promise<boolean> | null = null;
+
   private async tryRefreshToken(): Promise<boolean> {
-    try {
-      const res = await fetch(`${this.baseUrl}/auth/refresh`, {
-        method: "POST",
-        credentials: "include",
-      });
+    if (this.refreshPromise) return this.refreshPromise;
 
-      if (!res.ok) return false;
+    this.refreshPromise = (async () => {
+      try {
+        const res = await fetch(`${this.baseUrl}/auth/refresh`, {
+          method: "POST",
+          credentials: "include",
+        });
 
-      const data = await res.json();
-      this.setAccessToken(data.accessToken);
-      return true;
-    } catch {
-      return false;
-    }
+        if (!res.ok) return false;
+
+        const data = await res.json();
+        this.setAccessToken(data.accessToken);
+        return true;
+      } catch {
+        return false;
+      } finally {
+        this.refreshPromise = null;
+      }
+    })();
+
+    return this.refreshPromise;
   }
 
   private async request<T>(
