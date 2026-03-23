@@ -35,3 +35,13 @@ export interface AuthResponse {
   accessToken: string;
   user: User;
 }
+
+export interface VaultEntry {
+  id: string;
+  nodeId: string;
+  userId: string;
+  caption: string | null;
+  photoUrl: string | null;
+  visitedAt: string | null;
+  createdAt: string;
+}

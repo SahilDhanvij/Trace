@@ -8,6 +8,7 @@ import toast from "react-hot-toast";
 import CitySearch from "@/components/citySearch";
 import dynamic from "next/dynamic";
 import HomeCityModal from "@/components/homeCityModal";
+import VaultPanel from "@/components/vaultPanel";
 
 const MapView = dynamic(() => import("@/components/mapView"), { ssr: false });
 
@@ -20,6 +21,7 @@ export default function MapPage() {
   const [homeNodeId, setHomeNodeId] = useState<string | null>(null);
   const [showHomeModal, setShowHomeModal] = useState(false);
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
+  const [vaultNode, setVaultNode] = useState<Node | null>(null);
 
   useEffect(() => {
     loadData();
@@ -94,6 +96,7 @@ export default function MapPage() {
 
   const handleNodeClick = useCallback((node: Node) => {
     setSelectedNodeId((prev) => (prev === node.id ? null : node.id));
+    setVaultNode((prev) => (prev?.id === node.id ? null : node));
   }, []);
 
   if (loading) {
@@ -169,7 +172,16 @@ export default function MapPage() {
             }}
             title="Change home city"
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(200,160,32,0.5)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="rgba(200,160,32,0.5)"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
               <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-4 0a1 1 0 01-1-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 01-1 1" />
             </svg>
           </button>
@@ -195,7 +207,16 @@ export default function MapPage() {
             }}
             title="Logout"
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="rgba(255,255,255,0.3)"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
               <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4" />
               <polyline points="16 17 21 12 16 7" />
               <line x1="21" y1="12" x2="9" y2="12" />
@@ -207,11 +228,21 @@ export default function MapPage() {
       {!showHomeModal && (
         <div
           className="absolute bottom-5 left-1/2 -translate-x-1/2 z-10 pointer-events-none text-[10px] tracking-[0.2em]"
-          style={{ color: "rgba(255,255,255,0.1)", fontFamily: "'Inter', system-ui, sans-serif" }}
+          style={{
+            color: "rgba(255,255,255,0.1)",
+            fontFamily: "'Inter', system-ui, sans-serif",
+          }}
         >
           DRAG TO ROTATE · SCROLL TO ZOOM
         </div>
       )}
+      <VaultPanel
+        node={vaultNode}
+        onClose={() => {
+          setVaultNode(null);
+          setSelectedNodeId(null);
+        }}
+      />
     </div>
   );
 }

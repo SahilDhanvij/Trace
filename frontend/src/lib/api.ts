@@ -89,21 +89,30 @@ export class ApiClient {
     return response.json();
   }
   async loginWithGoogle(idToken: string) {
-    return this.request<{ accessToken: string; user: { id: string; email: string; name?: string | null } }>("/auth/google", {
+    return this.request<{
+      accessToken: string;
+      user: { id: string; email: string; name?: string | null };
+    }>("/auth/google", {
       method: "POST",
       body: JSON.stringify({ idToken }),
     });
   }
 
   async register(name: string, email: string, password: string) {
-    return this.request<{ accessToken: string; user: { id: string; email: string; name?: string | null } }>("/auth/register", {
+    return this.request<{
+      accessToken: string;
+      user: { id: string; email: string; name?: string | null };
+    }>("/auth/register", {
       method: "POST",
       body: JSON.stringify({ name, email, password }),
     });
   }
 
   async loginWithEmail(email: string, password: string) {
-    return this.request<{ accessToken: string; user: { id: string; email: string; name?: string | null } }>("/auth/login", {
+    return this.request<{
+      accessToken: string;
+      user: { id: string; email: string; name?: string | null };
+    }>("/auth/login", {
       method: "POST",
       body: JSON.stringify({ email, password }),
     });
@@ -183,6 +192,43 @@ export class ApiClient {
 
   async deleteEdge(id: string) {
     return this.request<any>(`/edges/${id}`, {
+      method: "DELETE",
+    });
+  }
+
+  async getVaultEntries(nodeId: string) {
+    return this.request<any[]>(`/vault/${nodeId}`);
+  }
+
+  async createVaultEntry(
+    nodeId: string,
+    data: {
+      caption?: string;
+      photoBase64?: string;
+      visitedAt?: string;
+    },
+  ) {
+    return this.request<any>(`/vault/${nodeId}`, {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  }
+
+  async updateVaultEntry(
+    entryId: string,
+    data: {
+      caption?: string;
+      visitedAt?: string;
+    },
+  ) {
+    return this.request<any>(`/vault/entry/${entryId}`, {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    });
+  }
+
+  async deleteVaultEntry(entryId: string) {
+    return this.request<any>(`/vault/entry/${entryId}`, {
       method: "DELETE",
     });
   }
