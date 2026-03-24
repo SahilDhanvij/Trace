@@ -1,7 +1,7 @@
 "use client";
 
 import type * as THREE from "three";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useImperativeHandle, forwardRef } from "react";
 import { Node, Edge } from "@/types";
 
 interface MapViewProps {
@@ -14,14 +14,18 @@ interface MapViewProps {
   onGlobeClick?: (lat: number, lng: number) => void;
 }
 
-export default function MapView({
+export interface MapViewHandle {
+  rotateTo: (lat: number, lng: number) => void;
+}
+
+const MapView = forwardRef<MapViewHandle, MapViewProps>(function MapView({
   nodes,
   edges,
   selectedNodeId,
   connectingFromId,
   homeNodeId,
   onNodeClick,
-}: MapViewProps) {
+}, ref) {
   const containerRef = useRef<HTMLDivElement>(null);
   const internals = useRef<any>(null);
   const latestProps = useRef({ nodes, edges, selectedNodeId, homeNodeId });
@@ -589,6 +593,15 @@ precision highp float;
 
       internals.current = {
         rebuild,
+        rotateTo(lat: number, lng: number) {
+          autoR = false;
+          clearTimeout(artTimer);
+          trx = lat * Math.PI / 180;
+          tryy = -(lng + 90) * Math.PI / 180;
+          trx = Math.max(-1.3, Math.min(1.3, trx));
+          tzm = 3.2;
+          artTimer = setTimeout(() => autoR = true, 5000);
+        },
         destroy() {
           dead = true;
           cancelAnimationFrame(aid);
@@ -610,6 +623,12 @@ precision highp float;
     };
   }, []);
 
+  useImperativeHandle(ref, () => ({
+    rotateTo(lat: number, lng: number) {
+      internals.current?.rotateTo(lat, lng);
+    },
+  }));
+
   // ── Sync props → scene ──────────────────────────────────────────
   useEffect(() => {
     internals.current?.rebuild(nodes, edges, selectedNodeId, homeNodeId);
@@ -622,4 +641,6 @@ precision highp float;
       style={{ background: "#020209" }}
     />
   );
-}
+});
+
+export default MapView;

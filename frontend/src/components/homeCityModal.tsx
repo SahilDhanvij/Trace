@@ -7,11 +7,13 @@ import { useCallback, useEffect, useRef, useState } from "react";
 interface HomeCityModalProps {
   currentHomeNode?: string;
   onDone: (homeNode: Node) => void;
+  onClose?: () => void;
 }
 
 export default function HomeCityModal({
   currentHomeNode,
   onDone,
+  onClose,
 }: HomeCityModalProps) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<GeoCodingResult[]>([]);
@@ -82,15 +84,30 @@ export default function HomeCityModal({
     <div
       className="fixed inset-0 z-50 flex items-center justify-center"
       style={{ background: "rgba(0,0,0,0.85)", backdropFilter: "blur(8px)" }}
+      onClick={() => onClose?.()}
     >
       <div
-        className="w-full max-w-sm mx-4 rounded-2xl p-6"
+        className="w-full max-w-sm mx-4 rounded-2xl p-6 relative"
         style={{
           background: "rgba(10,10,30,0.98)",
           border: "1px solid rgba(200,160,32,0.4)",
           boxShadow: "0 0 60px rgba(200,160,32,0.1)",
         }}
+        onClick={(e) => e.stopPropagation()}
       >
+        {onClose && (
+          <button
+            onClick={onClose}
+            className="absolute top-4 right-4 flex items-center justify-center w-7 h-7 rounded-full transition-colors"
+            style={{ background: "rgba(255,255,255,0.05)" }}
+            onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(255,255,255,0.1)")}
+            onMouseLeave={(e) => (e.currentTarget.style.background = "rgba(255,255,255,0.05)")}
+          >
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" strokeWidth="2" strokeLinecap="round">
+              <path d="M18 6L6 18M6 6l12 12" />
+            </svg>
+          </button>
+        )}
         <div className="mb-6 text-center">
           <div
             className="text-xs font-mono tracking-widest mb-2"

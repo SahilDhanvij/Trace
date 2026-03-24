@@ -121,33 +121,4 @@ export class AuthService {
       },
     };
   }
-
-  //not needed for prod
-  async devLogin(email: string) {
-    let user = await this.prisma.user.findUnique({
-      where: { email },
-    });
-
-    if (!user) {
-      user = await this.prisma.user.create({
-        data: { email },
-      });
-    }
-
-    const accessToken = this.jwtService.generateAccessToken({
-      id: user.id,
-      email: user.email,
-    });
-
-    // 🔥 Use your existing refresh token service
-    const refreshToken = await this.refreshTokenService.createRefreshToken(
-      user.id,
-    );
-
-    return {
-      accessToken,
-      refreshToken,
-      user,
-    };
-  }
 }

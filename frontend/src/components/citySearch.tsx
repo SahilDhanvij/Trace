@@ -73,44 +73,26 @@ export default function CitySearch(props: CitySearchProps) {
     props.onSelect(result);
   };
 
-  const expanded = focused || query.length > 0;
-
   return (
     <div ref={containerRef} className="relative">
       <div
-        className="flex items-center gap-2 transition-all duration-300 ease-out"
+        className="flex items-center gap-2.5 px-3.5 cursor-text"
         style={{
-          width: expanded ? 280 : 44,
-          height: 44,
-          borderRadius: expanded ? 14 : 22,
-          background: "rgba(8, 8, 20, 0.75)",
-          border: `1px solid ${expanded ? "rgba(200, 160, 32, 0.25)" : "rgba(255,255,255,0.08)"}`,
-          backdropFilter: "blur(20px)",
-          WebkitBackdropFilter: "blur(20px)",
-          boxShadow: expanded
-            ? "0 8px 32px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.04)"
-            : "0 4px 16px rgba(0,0,0,0.3)",
-          padding: expanded ? "0 14px" : "0",
-          justifyContent: expanded ? "flex-start" : "center",
-          cursor: expanded ? "text" : "pointer",
-          overflow: "hidden",
+          width: 220,
+          height: 38,
+          borderRadius: 12,
         }}
-        onClick={() => {
-          if (!expanded) {
-            setFocused(true);
-            setTimeout(() => inputRef.current?.focus(), 50);
-          }
-        }}
+        onClick={() => inputRef.current?.focus()}
       >
         {loading ? (
           <div
-            className="w-4 h-4 rounded-full border-2 border-transparent flex-shrink-0 animate-spin"
+            className="w-3.5 h-3.5 rounded-full border-2 border-transparent flex-shrink-0 animate-spin"
             style={{ borderTopColor: "rgba(200, 160, 32, 0.6)" }}
           />
         ) : (
           <svg
-            width="16"
-            height="16"
+            width="14"
+            height="14"
             viewBox="0 0 24 24"
             fill="none"
             stroke="rgba(200, 160, 32, 0.5)"
@@ -136,13 +118,11 @@ export default function CitySearch(props: CitySearchProps) {
           }}
           placeholder="Search a city…"
           disabled={props.disabled}
-          className="flex-1 bg-transparent outline-none text-[13px] min-w-0 tracking-wide"
+          className="flex-1 bg-transparent outline-none text-[12px] min-w-0"
           style={{
-            color: "rgba(255,255,255,0.85)",
+            color: "rgba(255,255,255,0.8)",
             fontFamily: "'Inter', system-ui, sans-serif",
-            opacity: expanded ? 1 : 0,
-            width: expanded ? "auto" : 0,
-            transition: "opacity 0.2s",
+            letterSpacing: "0.03em",
           }}
         />
         {query && (

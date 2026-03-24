@@ -9,6 +9,8 @@ import {
   Req,
 } from '@nestjs/common';
 import { VaultService } from './vault.service';
+import { CreateVaultEntryDto } from 'src/DTO/create-vault-entryDTO';
+import { UpdateVaultEntryDto } from 'src/DTO/update-vault-entryDTO';
 
 @Controller('vault')
 export class VaultController {
@@ -23,8 +25,7 @@ export class VaultController {
   createVaultEntry(
     @Req() req,
     @Param('nodeId') nodeId: string,
-    @Body()
-    body: { caption?: string; photoBase64?: string; visitedAt?: string },
+    @Body() body: CreateVaultEntryDto,
   ) {
     return this.vaultService.createVaultEntry(req.user.userId, nodeId, body);
   }
@@ -33,7 +34,7 @@ export class VaultController {
   updateVaultEntry(
     @Req() req,
     @Param('entryId') entryId: string,
-    @Body() body: { caption?: string; visitedAt?: string },
+    @Body() body: UpdateVaultEntryDto,
   ) {
     return this.vaultService.updateVaultEntry(req.user.userId, entryId, body);
   }

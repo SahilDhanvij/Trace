@@ -9,20 +9,26 @@ import { X, Upload, Trash2, Calendar, ChevronLeft } from "lucide-react";
 interface VaultPanelProps {
   node: Node | null;
   onClose: () => void;
+  onDeleteNode?: (nodeId: string) => void;
+  pendingEdge?: boolean;
+  requiredPhotos?: number;
+  onEdgeReady?: (nodeId: string) => void;
 }
 
-export default function VaultPanel({ node, onClose }: VaultPanelProps) {
+export default function VaultPanel({ node, onClose, onDeleteNode, pendingEdge, requiredPhotos = 2, onEdgeReady }: VaultPanelProps) {
   const [entries, setEntries] = useState<VaultEntry[]>([]);
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [selectedEntry, setSelectedEntry] = useState<VaultEntry | null>(null);
   const [editingCaption, setEditingCaption] = useState("");
+  const [edgeCreated, setEdgeCreated] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!node) return;
     setEntries([]);
     setSelectedEntry(null);
+    setEdgeCreated(false);
     loadEntries();
   }, [node?.id]);
 
@@ -95,8 +101,14 @@ export default function VaultPanel({ node, onClose }: VaultPanelProps) {
       const entry = await api.createVaultEntry(node.id, {
         photoBase64: base64,
       });
-      setEntries((prev) => [entry, ...prev]);
+      const updated = [entry, ...entries];
+      setEntries(updated);
       toast.success("Photo added.");
+
+      if (pendingEdge && !edgeCreated && updated.length >= requiredPhotos && onEdgeReady) {
+        setEdgeCreated(true);
+        onEdgeReady(node.id);
+      }
     } catch {
       toast.error("Upload failed.");
     } finally {
@@ -319,8 +331,34 @@ export default function VaultPanel({ node, onClose }: VaultPanelProps) {
         ) : (
           /* Grid view */
           <div className="flex-1 overflow-y-auto">
+            {/* Pending edge progress */}
+            {pendingEdge && !edgeCreated && (
+              <div className="px-4 pt-4 pb-2">
+                <div
+                  className="flex items-center justify-between px-4 py-3 rounded-xl"
+                  style={{
+                    background: "rgba(212,175,55,0.04)",
+                    border: "1px solid rgba(212,175,55,0.12)",
+                  }}
+                >
+                  <span
+                    className="text-[10px] tracking-[0.1em]"
+                    style={{ color: "rgba(212,175,55,0.6)", fontFamily: "'Inter', system-ui, sans-serif" }}
+                  >
+                    Upload {requiredPhotos} photos to connect arc
+                  </span>
+                  <span
+                    className="text-[11px] font-medium"
+                    style={{ color: entries.length >= requiredPhotos ? "rgba(80,200,120,0.8)" : "rgba(212,175,55,0.8)" }}
+                  >
+                    {Math.min(entries.length, requiredPhotos)}/{requiredPhotos}
+                  </span>
+                </div>
+              </div>
+            )}
+
             {/* Upload */}
-            <div className="p-4">
+            <div className="p-4 pt-2">
               <input
                 ref={fileInputRef}
                 type="file"
@@ -439,6 +477,39 @@ export default function VaultPanel({ node, onClose }: VaultPanelProps) {
                 ))}
               </div>
             )}
+          </div>
+        )}
+
+        {/* Remove city */}
+        {!selectedEntry && onDeleteNode && (
+          <div
+            className="shrink-0 px-5 py-4"
+            style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }}
+          >
+            <button
+              onClick={() => onDeleteNode(node.id)}
+              className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl transition-all"
+              style={{
+                background: "rgba(255,80,80,0.04)",
+                border: "1px solid rgba(255,80,80,0.12)",
+                color: "rgba(255,80,80,0.45)",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = "rgba(255,80,80,0.08)";
+                e.currentTarget.style.borderColor = "rgba(255,80,80,0.25)";
+                e.currentTarget.style.color = "rgba(255,80,80,0.8)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = "rgba(255,80,80,0.04)";
+                e.currentTarget.style.borderColor = "rgba(255,80,80,0.12)";
+                e.currentTarget.style.color = "rgba(255,80,80,0.45)";
+              }}
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+              <span className="text-[10px] font-medium tracking-[0.2em] uppercase">
+                Remove City
+              </span>
+            </button>
           </div>
         )}
       </div>

@@ -3,6 +3,34 @@
 import { motion, useScroll, useTransform } from "motion/react";
 import { ChevronRight, Shield, MapPin, Compass, Globe, History, Sparkles, Mountain, Eye, TrendingUp, Lock, Palmtree, Award, Navigation } from "lucide-react";
 import Link from "next/link";
+import dynamic from "next/dynamic";
+
+const MapView = dynamic(() => import("@/components/mapView"), { ssr: false });
+
+const DEMO_NODES = [
+  { id: "h", name: "Mumbai", latitude: 19.076, longitude: 72.8777, userId: "", createdAt: "" },
+  { id: "1", name: "Tokyo", latitude: 35.6762, longitude: 139.6503, userId: "", createdAt: "" },
+  { id: "2", name: "Paris", latitude: 48.8566, longitude: 2.3522, userId: "", createdAt: "" },
+  { id: "3", name: "New York", latitude: 40.7128, longitude: -74.006, userId: "", createdAt: "" },
+  { id: "4", name: "Dubai", latitude: 25.2048, longitude: 55.2708, userId: "", createdAt: "" },
+  { id: "5", name: "Sydney", latitude: -33.8688, longitude: 151.2093, userId: "", createdAt: "" },
+  { id: "6", name: "London", latitude: 51.5074, longitude: -0.1278, userId: "", createdAt: "" },
+  { id: "7", name: "Singapore", latitude: 1.3521, longitude: 103.8198, userId: "", createdAt: "" },
+  { id: "8", name: "Cape Town", latitude: -33.9249, longitude: 18.4241, userId: "", createdAt: "" },
+  { id: "9", name: "Rio de Janeiro", latitude: -22.9068, longitude: -43.1729, userId: "", createdAt: "" },
+];
+
+const DEMO_EDGES = [
+  { id: "e1", fromId: "h", toId: "1", userId: "", createdAt: "" },
+  { id: "e2", fromId: "h", toId: "2", userId: "", createdAt: "" },
+  { id: "e3", fromId: "h", toId: "3", userId: "", createdAt: "" },
+  { id: "e4", fromId: "h", toId: "4", userId: "", createdAt: "" },
+  { id: "e5", fromId: "h", toId: "5", userId: "", createdAt: "" },
+  { id: "e6", fromId: "h", toId: "6", userId: "", createdAt: "" },
+  { id: "e7", fromId: "h", toId: "7", userId: "", createdAt: "" },
+  { id: "e8", fromId: "h", toId: "8", userId: "", createdAt: "" },
+  { id: "e9", fromId: "h", toId: "9", userId: "", createdAt: "" },
+];
 
 const PARTICLES = [
   { x: 12, y: 85, o: 0.17, dur: 7, del: 0.2 },
@@ -277,7 +305,10 @@ export default function LandingPage() {
             <div className="border-t border-white/[0.05] px-6 py-4 flex items-center gap-4">
               <div className="flex-1">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-[9px] uppercase tracking-[0.15em] text-white/25">Explorer &rarr; Globetrotter</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[9px] uppercase tracking-[0.15em] text-white/25">Explorer &rarr; Globetrotter</span>
+                    <span className="px-2 py-0.5 rounded-full text-[7px] uppercase tracking-[0.15em] font-medium border border-white/10 bg-white/[0.03] text-white/25">Soon</span>
+                  </div>
                   <span className="text-[9px] text-white/20">24 / 50 cities</span>
                 </div>
                 <div className="w-full h-1 bg-white/[0.05] rounded-full overflow-hidden">
@@ -294,7 +325,10 @@ export default function LandingPage() {
 
             {/* Achievement badges */}
             <div className="border-t border-white/[0.05] px-6 py-4">
-              <div className="text-[9px] uppercase tracking-[0.2em] text-white/20 mb-3">Badges Earned</div>
+              <div className="flex items-center gap-2 mb-3">
+                <span className="text-[9px] uppercase tracking-[0.2em] text-white/20">Badges Earned</span>
+                <span className="px-2 py-0.5 rounded-full text-[7px] uppercase tracking-[0.15em] font-medium border border-white/10 bg-white/[0.03] text-white/25">Soon</span>
+              </div>
               <div className="flex items-center gap-3">
                 {[
                   { icon: MapPin, label: "10 Cities", earned: true },
@@ -362,7 +396,10 @@ export default function LandingPage() {
                 <Mountain className="w-3 h-3 text-[#D4AF37]" />
                 <span className="text-[9px] uppercase tracking-[0.2em] text-[#D4AF37]">Hidden Gems</span>
               </div>
-              <h2 className="text-3xl md:text-5xl font-serif italic">Discovered by explorers like you.</h2>
+              <div className="flex items-center gap-3 flex-wrap">
+                <h2 className="text-3xl md:text-5xl font-serif italic">Discovered by explorers like you.</h2>
+                <span className="px-3 py-1 rounded-full text-[8px] uppercase tracking-[0.2em] font-medium border border-white/10 bg-white/[0.03] text-white/30">Coming Soon</span>
+              </div>
               <p className="text-white/40 text-sm max-w-md leading-relaxed">The best travel stories come from places nobody told you about. See what the community has uncovered.</p>
             </div>
             <Link href="/login" className="text-[10px] uppercase tracking-[0.2em] text-[#D4AF37] hover:text-white transition-colors whitespace-nowrap flex items-center gap-2 group">
@@ -450,13 +487,16 @@ export default function LandingPage() {
             </p>
             <div className="space-y-6">
               {[
-                "Automatic path generation",
-                "Atmospheric time-of-day rendering",
-                "Encrypted, offline-first storage",
-              ].map((text, i) => (
+                { text: "Automatic path generation", soon: true },
+                { text: "Atmospheric time-of-day rendering", soon: true },
+                { text: "Encrypted, offline-first storage", soon: true },
+              ].map((item, i) => (
                 <div key={i} className="flex items-center gap-4 text-white/80">
                   <div className="w-1.5 h-1.5 rounded-full bg-[#D4AF37]" />
-                  <span className="text-sm font-light tracking-wide">{text}</span>
+                  <span className="text-sm font-light tracking-wide">{item.text}</span>
+                  {item.soon && (
+                    <span className="px-2.5 py-0.5 rounded-full text-[7px] uppercase tracking-[0.15em] font-medium border border-[#D4AF37]/15 bg-[#D4AF37]/[0.04] text-[#D4AF37]/40">Coming Soon</span>
+                  )}
                 </div>
               ))}
             </div>
@@ -516,24 +556,83 @@ export default function LandingPage() {
         </motion.div>
       </section>
 
-      {/* 5. The Tease */}
-      <section className="py-64 px-6 text-center relative">
+      {/* 5. The Tease — blurred globe peek */}
+      <section className="py-48 px-6 text-center relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#D4AF37]/5 to-transparent" />
+
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 1.5 }}
-          className="max-w-3xl mx-auto space-y-12 relative z-10"
+          className="max-w-5xl mx-auto relative z-10"
         >
-          <h2 className="text-5xl md:text-8xl font-serif italic tracking-tighter">
-            There&apos;s a reason we don&apos;t show it here.
-          </h2>
-          <p className="text-xl md:text-3xl text-white/50 font-light leading-relaxed italic">
-            &ldquo;Some things only make sense when they&apos;re yours.<br />
-            Your map is one of them.&rdquo;
+          <div className="space-y-8 mb-16">
+            <h2 className="text-5xl md:text-8xl font-serif italic tracking-tighter">
+              There&apos;s a reason we don&apos;t show it all.
+            </h2>
+            <p className="text-xl md:text-2xl text-white/40 font-light leading-relaxed italic max-w-2xl mx-auto">
+              Your map is personal. Here&apos;s just a glimpse.
+            </p>
+          </div>
+
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 1.2, ease: "easeOut" }}
+            className="relative rounded-2xl overflow-hidden mx-auto"
+            style={{
+              height: 420,
+              maxWidth: 750,
+              background: "#020209",
+              border: "1px solid rgba(255,255,255,0.04)",
+            }}
+          >
+            <MapView
+              nodes={DEMO_NODES as any}
+              edges={DEMO_EDGES as any}
+              selectedNodeId={null}
+              connectingFromId={null}
+              homeNodeId="h"
+              onNodeClick={() => {}}
+            />
+            {/* Heavy blur + fade overlay */}
+            <div
+              className="absolute inset-0 pointer-events-none"
+              style={{
+                backdropFilter: "blur(6px)",
+                WebkitBackdropFilter: "blur(6px)",
+                background: "radial-gradient(circle at 50% 50%, transparent 20%, rgba(5,5,5,0.7) 70%, rgba(5,5,5,0.95) 100%)",
+              }}
+            />
+            {/* Center label */}
+            <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-10">
+              <div
+                className="px-6 py-3 rounded-full mb-4"
+                style={{
+                  background: "rgba(8,8,20,0.8)",
+                  border: "1px solid rgba(200,160,32,0.2)",
+                  backdropFilter: "blur(16px)",
+                }}
+              >
+                <span className="text-[10px] uppercase tracking-[0.25em] text-[#D4AF37]/60">Sign in to reveal your globe</span>
+              </div>
+              <Link href="/login">
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="px-8 py-3 bg-[#D4AF37] text-black rounded-full font-bold tracking-widest uppercase text-[10px] transition-all hover:shadow-[0_0_30px_rgba(212,175,55,0.3)]"
+                >
+                  Create my map
+                </motion.button>
+              </Link>
+            </div>
+          </motion.div>
+
+          <p className="text-white/15 text-[10px] uppercase tracking-[0.2em] mt-8">
+            What you see above is just a preview — your globe is uniquely yours
           </p>
-          <div className="w-12 h-px bg-[#D4AF37] mx-auto opacity-50" />
         </motion.div>
       </section>
 

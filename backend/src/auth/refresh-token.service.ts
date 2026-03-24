@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PrismaService } from 'src/common/prisma/prisma.service';
 import { JwtService } from './jwt/jwt.service';
 import { createHash, hash } from 'crypto';
@@ -37,7 +37,7 @@ export class RefreshTokenService {
     try {
       payload = this.jwtService.verifyRefreshToken(incomingToken);
     } catch {
-      throw new Error('Invalid or expired refresh token');
+      throw new UnauthorizedException('Invalid or expired refresh token');
     }
 
     const hashValue = hashToken(incomingToken);
@@ -50,7 +50,7 @@ export class RefreshTokenService {
       },
     });
     if (!storedToken) {
-      throw new Error('Refresh token not found or expired');
+      throw new UnauthorizedException('Refresh token not found or expired');
     }
     await this.prisma.refreshToken.delete({
       where: {

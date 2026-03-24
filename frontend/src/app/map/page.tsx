@@ -3,12 +3,13 @@
 import { api } from "@/lib/api";
 import { Edge, GeoCodingResult, Node } from "@/types";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import CitySearch from "@/components/citySearch";
 import dynamic from "next/dynamic";
 import HomeCityModal from "@/components/homeCityModal";
 import VaultPanel from "@/components/vaultPanel";
+import type { MapViewHandle } from "@/components/mapView";
 
 const MapView = dynamic(() => import("@/components/mapView"), { ssr: false });
 
@@ -22,6 +23,8 @@ export default function MapPage() {
   const [showHomeModal, setShowHomeModal] = useState(false);
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [vaultNode, setVaultNode] = useState<Node | null>(null);
+  const [pendingEdgeNodeId, setPendingEdgeNodeId] = useState<string | null>(null);
+  const mapRef = useRef<MapViewHandle>(null);
 
   useEffect(() => {
     loadData();
@@ -42,9 +45,14 @@ export default function MapPage() {
       } else {
         setHomeNodeId(userData.homeNodeId);
       }
-    } catch (error) {
-      console.error("Error loading data:", error);
-      toast.error("Error loading data.");
+    } catch (error: any) {
+      const isAuthError =
+        error?.message?.includes("Session expired") ||
+        error?.message?.includes("Unauthorized");
+      if (!isAuthError) {
+        console.error("Error loading data:", error);
+        toast.error("Error loading data.");
+      }
       router.push("/login");
     } finally {
       setLoading(false);
@@ -83,12 +91,28 @@ export default function MapPage() {
           latitude: result.latitude,
           longitude: result.longitude,
         });
-        const newEdge = await api.createEdge(homeNodeId, newNode.id);
         setNodes((prev) => [...prev, newNode]);
-        setEdges((prev) => [...prev, newEdge]);
-        toast.success(`📍 ${result.name} added!`);
+        setPendingEdgeNodeId(newNode.id);
+        setSelectedNodeId(newNode.id);
+        setVaultNode(newNode);
+        toast.success(`📍 ${result.name} added — upload 2 photos to connect!`);
       } catch (error: any) {
         toast.error(error.message || "Failed to add city.");
+      }
+    },
+    [homeNodeId],
+  );
+
+  const handleEdgeCreated = useCallback(
+    async (nodeId: string) => {
+      if (!homeNodeId) return;
+      try {
+        const newEdge = await api.createEdge(homeNodeId, nodeId);
+        setEdges((prev) => [...prev, newEdge]);
+        setPendingEdgeNodeId(null);
+        toast.success("Arc connected!");
+      } catch (error: any) {
+        toast.error(error.message || "Failed to create arc.");
       }
     },
     [homeNodeId],
@@ -120,11 +144,13 @@ export default function MapPage() {
         <HomeCityModal
           currentHomeNode={homeNode?.name}
           onDone={handleHomeDone}
+          onClose={homeNodeId ? () => setShowHomeModal(false) : undefined}
         />
       )}
 
       <div className="absolute inset-0">
         <MapView
+          ref={mapRef}
           nodes={nodes}
           edges={edges}
           selectedNodeId={selectedNodeId}
@@ -135,7 +161,7 @@ export default function MapPage() {
       </div>
 
       {/* Top bar */}
-      <div className="absolute top-0 left-0 right-0 z-10 flex items-start justify-between px-6 pt-5">
+      <div className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between px-5 pt-4">
         {/* Left: brand */}
         <div
           className="text-[11px] font-medium tracking-[0.35em] pointer-events-none"
@@ -147,80 +173,72 @@ export default function MapPage() {
           TRACE
         </div>
 
-        {/* Right: search + actions */}
-        <div className="flex items-center gap-2">
+        {/* Right: toolbar */}
+        <div
+          className="flex items-center gap-0.5 px-2 py-1.5"
+          style={{
+            borderRadius: 14,
+            background: "rgba(12, 12, 28, 0.8)",
+            border: "1px solid rgba(200, 160, 32, 0.12)",
+            backdropFilter: "blur(24px)",
+            WebkitBackdropFilter: "blur(24px)",
+            boxShadow: "0 6px 32px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.03) inset",
+          }}
+        >
           <CitySearch onSelect={handleCitySelected} />
+
+          <div className="w-px h-5 mx-1" style={{ background: "rgba(255,255,255,0.06)" }} />
+
           <button
             onClick={() => setShowHomeModal(true)}
-            className="group flex items-center justify-center transition-all duration-200"
+            className="flex items-center gap-2 px-3.5 py-2 transition-all duration-200"
             style={{
-              width: 44,
-              height: 44,
-              borderRadius: 22,
-              background: "rgba(8, 8, 20, 0.75)",
-              border: "1px solid rgba(255,255,255,0.08)",
-              backdropFilter: "blur(20px)",
-              WebkitBackdropFilter: "blur(20px)",
+              borderRadius: 12,
+              color: "rgba(200,160,32,0.7)",
+              fontSize: 11,
+              fontFamily: "'Inter', system-ui, sans-serif",
+              letterSpacing: "0.06em",
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.borderColor = "rgba(200,160,32,0.25)";
-              e.currentTarget.style.background = "rgba(200,160,32,0.06)";
+              e.currentTarget.style.background = "rgba(200,160,32,0.08)";
+              e.currentTarget.style.color = "rgba(200,160,32,0.95)";
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)";
-              e.currentTarget.style.background = "rgba(8, 8, 20, 0.75)";
+              e.currentTarget.style.background = "transparent";
+              e.currentTarget.style.color = "rgba(200,160,32,0.7)";
             }}
-            title="Change home city"
           >
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="rgba(200,160,32,0.5)"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-4 0a1 1 0 01-1-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 01-1 1" />
             </svg>
+            Home
           </button>
+
           <button
             onClick={handleLogout}
-            className="flex items-center justify-center transition-all duration-200"
+            className="flex items-center gap-2 px-3.5 py-2 transition-all duration-200"
             style={{
-              width: 44,
-              height: 44,
-              borderRadius: 22,
-              background: "rgba(8, 8, 20, 0.75)",
-              border: "1px solid rgba(255,255,255,0.08)",
-              backdropFilter: "blur(20px)",
-              WebkitBackdropFilter: "blur(20px)",
+              borderRadius: 12,
+              color: "rgba(255,255,255,0.35)",
+              fontSize: 11,
+              fontFamily: "'Inter', system-ui, sans-serif",
+              letterSpacing: "0.06em",
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.borderColor = "rgba(255,80,80,0.25)";
-              e.currentTarget.style.background = "rgba(255,80,80,0.06)";
+              e.currentTarget.style.background = "rgba(255,255,255,0.06)";
+              e.currentTarget.style.color = "rgba(255,255,255,0.7)";
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)";
-              e.currentTarget.style.background = "rgba(8, 8, 20, 0.75)";
+              e.currentTarget.style.background = "transparent";
+              e.currentTarget.style.color = "rgba(255,255,255,0.35)";
             }}
-            title="Logout"
           >
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="rgba(255,255,255,0.3)"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4" />
               <polyline points="16 17 21 12 16 7" />
               <line x1="21" y1="12" x2="9" y2="12" />
             </svg>
+            Logout
           </button>
         </div>
       </div>
@@ -238,10 +256,34 @@ export default function MapPage() {
       )}
       <VaultPanel
         node={vaultNode}
-        onClose={() => {
+        onClose={async () => {
+          if (vaultNode && vaultNode.id === pendingEdgeNodeId) {
+            try {
+              await api.deleteNode(vaultNode.id);
+              setNodes((prev) => prev.filter((n) => n.id !== vaultNode.id));
+              toast("City removed — no photos were added.", { icon: "🗑️" });
+            } catch {}
+            setPendingEdgeNodeId(null);
+          }
           setVaultNode(null);
           setSelectedNodeId(null);
         }}
+        onDeleteNode={async (nodeId) => {
+          try {
+            await api.deleteNode(nodeId);
+            setNodes((prev) => prev.filter((n) => n.id !== nodeId));
+            setEdges((prev) => prev.filter((e) => e.fromId !== nodeId && e.toId !== nodeId));
+            setPendingEdgeNodeId(null);
+            setVaultNode(null);
+            setSelectedNodeId(null);
+            toast.success("City removed.");
+          } catch (error: any) {
+            toast.error(error.message || "Failed to remove city.");
+          }
+        }}
+        pendingEdge={vaultNode?.id === pendingEdgeNodeId}
+        requiredPhotos={2}
+        onEdgeReady={(nodeId) => handleEdgeCreated(nodeId)}
       />
     </div>
   );

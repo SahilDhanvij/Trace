@@ -7,23 +7,14 @@ export class ApiClient {
 
   constructor() {
     this.baseUrl = API_BASE_URL;
-    if (typeof window !== "undefined") {
-      this.accessToken = localStorage.getItem("accessToken");
-    }
   }
 
   setAccessToken(token: string) {
     this.accessToken = token;
-    if (typeof window !== "undefined") {
-      localStorage.setItem("accessToken", token);
-    }
   }
 
   clearAccessToken() {
     this.accessToken = null;
-    if (typeof window !== "undefined") {
-      localStorage.removeItem("accessToken");
-    }
   }
 
   private refreshPromise: Promise<boolean> | null = null;
