@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, useScroll, useTransform } from "motion/react";
-import { ChevronRight, Shield, MapPin, Compass, Globe, History, Sparkles, Mountain, Eye, TrendingUp, Lock, Palmtree, Award, Navigation } from "lucide-react";
+import { ChevronRight, Shield, MapPin, Compass, Globe, History, Sparkles, Mountain, TrendingUp, Lock, Palmtree, Navigation } from "lucide-react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 
@@ -307,7 +307,7 @@ export default function LandingPage() {
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-2">
                     <span className="text-[9px] uppercase tracking-[0.15em] text-white/25">Explorer &rarr; Globetrotter</span>
-                    <span className="px-2 py-0.5 rounded-full text-[7px] uppercase tracking-[0.15em] font-medium border border-white/10 bg-white/[0.03] text-white/25">Soon</span>
+                    {/* <span className="px-2 py-0.5 rounded-full text-[7px] uppercase tracking-[0.15em] font-medium border border-white/10 bg-white/[0.03] text-white/25">Soon</span> */}
                   </div>
                   <span className="text-[9px] text-white/20">24 / 50 cities</span>
                 </div>
@@ -327,7 +327,7 @@ export default function LandingPage() {
             <div className="border-t border-white/[0.05] px-6 py-4">
               <div className="flex items-center gap-2 mb-3">
                 <span className="text-[9px] uppercase tracking-[0.2em] text-white/20">Badges Earned</span>
-                <span className="px-2 py-0.5 rounded-full text-[7px] uppercase tracking-[0.15em] font-medium border border-white/10 bg-white/[0.03] text-white/25">Soon</span>
+                {/* <span className="px-2 py-0.5 rounded-full text-[7px] uppercase tracking-[0.15em] font-medium border border-white/10 bg-white/[0.03] text-white/25">Soon</span> */}
               </div>
               <div className="flex items-center gap-3">
                 {[
@@ -362,6 +362,98 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* === COMING SOON: Hidden Gems Section ===
+      <section className="py-48 px-6 relative overflow-hidden">
+        <div className="absolute top-1/2 left-0 w-[400px] h-[400px] bg-[radial-gradient(circle,#D4AF3706_0%,transparent_70%)] pointer-events-none" />
+        <div className="max-w-7xl mx-auto">
+          <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
+            <div className="space-y-4">
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-[#D4AF37]/15 bg-[#D4AF37]/5">
+                <Mountain className="w-3 h-3 text-[#D4AF37]" />
+                <span className="text-[9px] uppercase tracking-[0.2em] text-[#D4AF37]">Hidden Gems</span>
+              </div>
+              <h2 className="text-3xl md:text-5xl font-serif italic">Discovered by explorers like you.</h2>
+              <p className="text-white/40 text-sm max-w-md leading-relaxed">The best travel stories come from places nobody told you about. See what the community has uncovered.</p>
+            </div>
+            <Link href="/login" className="text-[10px] uppercase tracking-[0.2em] text-[#D4AF37] hover:text-white transition-colors whitespace-nowrap flex items-center gap-2 group">
+              Explore all gems
+              <ChevronRight className="w-3 h-3 transition-transform group-hover:translate-x-1" />
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {[
+              { img: "https://images.unsplash.com/photo-1504893524553-b855bce32c67?w=600&q=80", place: "Hallstatt", country: "Austria", tag: "Lakeside village frozen in time", by: "explorer_anna" },
+              { img: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=600&q=80", place: "Chefchaouen", country: "Morocco", tag: "The blue pearl of the Rif Mountains", by: "wanderer_kai" },
+              { img: "https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=600&q=80", place: "Lofoten Islands", country: "Norway", tag: "Arctic beauty above the circle", by: "north_seeker" },
+            ].map((gem, i) => (
+              <motion.div key={i} initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.8, delay: i * 0.15 }} className="group cursor-pointer">
+                <div className="relative rounded-2xl overflow-hidden mb-5">
+                  <img src={gem.img} alt={gem.place} className="w-full aspect-[4/5] object-cover group-hover:scale-105 transition-transform duration-700" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
+                  <div className="absolute bottom-0 left-0 right-0 p-6">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Eye className="w-3 h-3 text-[#D4AF37]" />
+                      <span className="text-[9px] uppercase tracking-[0.2em] text-[#D4AF37]">Hidden Gem</span>
+                    </div>
+                    <h3 className="text-2xl font-serif italic">{gem.place}</h3>
+                    <p className="text-white/50 text-xs mt-1">{gem.country}</p>
+                  </div>
+                </div>
+                <p className="text-white/40 text-sm font-light italic leading-relaxed mb-2">&ldquo;{gem.tag}&rdquo;</p>
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 rounded-full bg-[#D4AF37]/20 border border-[#D4AF37]/30" />
+                  <span className="text-[9px] uppercase tracking-[0.15em] text-white/20">@{gem.by}</span>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+      */}
+
+      {/* === COMING SOON: Memory, Not Metrics Section ===
+      <section className="py-48 px-6 relative overflow-hidden">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-[radial-gradient(circle_at_center,#D4AF3708_0%,transparent_70%)] pointer-events-none" />
+        <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-32 items-center">
+          <motion.div initial={{ opacity: 0, x: -40 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 1.2 }}>
+            <h2 className="text-5xl md:text-7xl font-serif italic mb-10 leading-tight">
+              Travel fades.<br />Memory shouldn&apos;t.
+            </h2>
+            <p className="text-xl text-white/50 font-light leading-relaxed mb-12">
+              Photos get buried in a cloud. Notes disappear in old journals.
+              Trace keeps each place alive — privately, beautifully, and in context.
+            </p>
+            <div className="space-y-6">
+              {[
+                "Automatic path generation",
+                "Atmospheric time-of-day rendering",
+                "Encrypted, offline-first storage",
+              ].map((text, i) => (
+                <div key={i} className="flex items-center gap-4 text-white/80">
+                  <div className="w-1.5 h-1.5 rounded-full bg-[#D4AF37]" />
+                  <span className="text-sm font-light tracking-wide">{text}</span>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+
+          <div className="relative aspect-square flex items-center justify-center">
+            <div className="absolute inset-0 border border-white/5 rounded-full animate-[spin_60s_linear_infinite]" />
+            <div className="absolute inset-12 border border-white/5 rounded-full animate-[spin_40s_linear_infinite_reverse]" />
+            <motion.div animate={{ rotate: 360 }} transition={{ duration: 100, repeat: Infinity, ease: "linear" }} className="relative z-10 w-full h-full flex items-center justify-center">
+              {[...Array(8)].map((_, i) => (
+                <motion.div key={i} className="absolute w-1 h-1 bg-[#D4AF37] rounded-full" style={{ transform: `rotate(${i * 45}deg) translateY(-180px)` }} animate={{ opacity: [0.2, 1, 0.2] }} transition={{ duration: 3, repeat: Infinity, delay: i * 0.4 }} />
+              ))}
+              <div className="w-32 h-32 rounded-full bg-gradient-to-br from-[#D4AF37]/20 to-transparent backdrop-blur-2xl border border-[#D4AF37]/30 flex items-center justify-center">
+                <Compass className="text-[#D4AF37] w-10 h-10 animate-pulse" />
+              </div>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+      */}
+
       {/* 2. The Promise */}
       <section className="py-48 px-6">
         <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-24">
@@ -386,147 +478,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Hidden Gems */}
-      <section className="py-48 px-6 relative overflow-hidden">
-        <div className="absolute top-1/2 left-0 w-[400px] h-[400px] bg-[radial-gradient(circle,#D4AF3706_0%,transparent_70%)] pointer-events-none" />
-        <div className="max-w-7xl mx-auto">
-          <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
-            <div className="space-y-4">
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-[#D4AF37]/15 bg-[#D4AF37]/5">
-                <Mountain className="w-3 h-3 text-[#D4AF37]" />
-                <span className="text-[9px] uppercase tracking-[0.2em] text-[#D4AF37]">Hidden Gems</span>
-              </div>
-              <div className="flex items-center gap-3 flex-wrap">
-                <h2 className="text-3xl md:text-5xl font-serif italic">Discovered by explorers like you.</h2>
-                <span className="px-3 py-1 rounded-full text-[8px] uppercase tracking-[0.2em] font-medium border border-white/10 bg-white/[0.03] text-white/30">Coming Soon</span>
-              </div>
-              <p className="text-white/40 text-sm max-w-md leading-relaxed">The best travel stories come from places nobody told you about. See what the community has uncovered.</p>
-            </div>
-            <Link href="/login" className="text-[10px] uppercase tracking-[0.2em] text-[#D4AF37] hover:text-white transition-colors whitespace-nowrap flex items-center gap-2 group">
-              Explore all gems
-              <ChevronRight className="w-3 h-3 transition-transform group-hover:translate-x-1" />
-            </Link>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {[
-              {
-                img: "https://images.unsplash.com/photo-1504893524553-b855bce32c67?w=600&q=80",
-                place: "Hallstatt",
-                country: "Austria",
-                tag: "Lakeside village frozen in time",
-                by: "explorer_anna",
-              },
-              {
-                img: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=600&q=80",
-                place: "Chefchaouen",
-                country: "Morocco",
-                tag: "The blue pearl of the Rif Mountains",
-                by: "wanderer_kai",
-              },
-              {
-                img: "https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=600&q=80",
-                place: "Lofoten Islands",
-                country: "Norway",
-                tag: "Arctic beauty above the circle",
-                by: "north_seeker",
-              },
-            ].map((gem, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.8, delay: i * 0.15 }}
-                className="group cursor-pointer"
-              >
-                <div className="relative rounded-2xl overflow-hidden mb-5">
-                  <img
-                    src={gem.img}
-                    alt={gem.place}
-                    className="w-full aspect-[4/5] object-cover group-hover:scale-105 transition-transform duration-700"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
-                  <div className="absolute bottom-0 left-0 right-0 p-6">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Eye className="w-3 h-3 text-[#D4AF37]" />
-                      <span className="text-[9px] uppercase tracking-[0.2em] text-[#D4AF37]">Hidden Gem</span>
-                    </div>
-                    <h3 className="text-2xl font-serif italic">{gem.place}</h3>
-                    <p className="text-white/50 text-xs mt-1">{gem.country}</p>
-                  </div>
-                </div>
-                <p className="text-white/40 text-sm font-light italic leading-relaxed mb-2">&ldquo;{gem.tag}&rdquo;</p>
-                <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 rounded-full bg-[#D4AF37]/20 border border-[#D4AF37]/30" />
-                  <span className="text-[9px] uppercase tracking-[0.15em] text-white/20">@{gem.by}</span>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* 3. Memory, Not Metrics */}
-      <section className="py-48 px-6 relative overflow-hidden">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-[radial-gradient(circle_at_center,#D4AF3708_0%,transparent_70%)] pointer-events-none" />
-
-        <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-32 items-center">
-          <motion.div
-            initial={{ opacity: 0, x: -40 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 1.2 }}
-          >
-            <h2 className="text-5xl md:text-7xl font-serif italic mb-10 leading-tight">
-              Travel fades.<br />Memory shouldn&apos;t.
-            </h2>
-            <p className="text-xl text-white/50 font-light leading-relaxed mb-12">
-              Photos get buried in a cloud. Notes disappear in old journals.
-              Trace keeps each place alive — privately, beautifully, and in context.
-            </p>
-            <div className="space-y-6">
-              {[
-                { text: "Automatic path generation", soon: true },
-                { text: "Atmospheric time-of-day rendering", soon: true },
-                { text: "Encrypted, offline-first storage", soon: true },
-              ].map((item, i) => (
-                <div key={i} className="flex items-center gap-4 text-white/80">
-                  <div className="w-1.5 h-1.5 rounded-full bg-[#D4AF37]" />
-                  <span className="text-sm font-light tracking-wide">{item.text}</span>
-                  {item.soon && (
-                    <span className="px-2.5 py-0.5 rounded-full text-[7px] uppercase tracking-[0.15em] font-medium border border-[#D4AF37]/15 bg-[#D4AF37]/[0.04] text-[#D4AF37]/40">Coming Soon</span>
-                  )}
-                </div>
-              ))}
-            </div>
-          </motion.div>
-
-          <div className="relative aspect-square flex items-center justify-center">
-            <div className="absolute inset-0 border border-white/5 rounded-full animate-[spin_60s_linear_infinite]" />
-            <div className="absolute inset-12 border border-white/5 rounded-full animate-[spin_40s_linear_infinite_reverse]" />
-
-            <motion.div
-              animate={{ rotate: 360 }}
-              transition={{ duration: 100, repeat: Infinity, ease: "linear" }}
-              className="relative z-10 w-full h-full flex items-center justify-center"
-            >
-              {[...Array(8)].map((_, i) => (
-                <motion.div
-                  key={i}
-                  className="absolute w-1 h-1 bg-[#D4AF37] rounded-full"
-                  style={{ transform: `rotate(${i * 45}deg) translateY(-180px)` }}
-                  animate={{ opacity: [0.2, 1, 0.2] }}
-                  transition={{ duration: 3, repeat: Infinity, delay: i * 0.4 }}
-                />
-              ))}
-              <div className="w-32 h-32 rounded-full bg-gradient-to-br from-[#D4AF37]/20 to-transparent backdrop-blur-2xl border border-[#D4AF37]/30 flex items-center justify-center">
-                <Compass className="text-[#D4AF37] w-10 h-10 animate-pulse" />
-              </div>
-            </motion.div>
-          </div>
-        </div>
-      </section>
 
       {/* 4. Private by Design */}
       <section className="py-48 px-6 text-center">
