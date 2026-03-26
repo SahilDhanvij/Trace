@@ -1,7 +1,7 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PrismaService } from 'src/common/prisma/prisma.service';
 import { JwtService } from './jwt/jwt.service';
-import { createHash, hash } from 'crypto';
+import { createHash} from 'crypto';
 
 const REFRESH_TOKEN_EXPIRY_DAYS = 7;
 
