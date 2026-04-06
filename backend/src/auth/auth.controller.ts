@@ -90,6 +90,7 @@ export class AuthController {
     return req.user;
   }
 
+  @Public()
   @Post('logout')
   async logOut(
     @Req() req: express.Request,

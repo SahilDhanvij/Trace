@@ -62,11 +62,11 @@ export default function MapPage() {
   const handleLogout = async () => {
     try {
       await api.logout();
-      api.clearAccessToken();
-      router.push("/login");
     } catch {
-      toast.error("Logout failed.");
+      // Best-effort — still clear local state and redirect
     }
+    api.clearAccessToken();
+    window.location.href = "/login";
   };
 
   const handleHomeDone = useCallback((homeNode: Node) => {

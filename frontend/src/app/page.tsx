@@ -1,36 +1,8 @@
 "use client";
 
 import { motion, useScroll, useTransform } from "motion/react";
-import { ChevronRight, Shield, MapPin, Compass, Globe, History, Sparkles, Mountain, TrendingUp, Lock, Palmtree, Navigation } from "lucide-react";
+import { ChevronRight, Shield, MapPin, Compass, Globe, Sparkles, TrendingUp } from "lucide-react";
 import Link from "next/link";
-import dynamic from "next/dynamic";
-
-const MapView = dynamic(() => import("@/components/mapView"), { ssr: false });
-
-const DEMO_NODES = [
-  { id: "h", name: "Mumbai", latitude: 19.076, longitude: 72.8777, userId: "", createdAt: "" },
-  { id: "1", name: "Tokyo", latitude: 35.6762, longitude: 139.6503, userId: "", createdAt: "" },
-  { id: "2", name: "Paris", latitude: 48.8566, longitude: 2.3522, userId: "", createdAt: "" },
-  { id: "3", name: "New York", latitude: 40.7128, longitude: -74.006, userId: "", createdAt: "" },
-  { id: "4", name: "Dubai", latitude: 25.2048, longitude: 55.2708, userId: "", createdAt: "" },
-  { id: "5", name: "Sydney", latitude: -33.8688, longitude: 151.2093, userId: "", createdAt: "" },
-  { id: "6", name: "London", latitude: 51.5074, longitude: -0.1278, userId: "", createdAt: "" },
-  { id: "7", name: "Singapore", latitude: 1.3521, longitude: 103.8198, userId: "", createdAt: "" },
-  { id: "8", name: "Cape Town", latitude: -33.9249, longitude: 18.4241, userId: "", createdAt: "" },
-  { id: "9", name: "Rio de Janeiro", latitude: -22.9068, longitude: -43.1729, userId: "", createdAt: "" },
-];
-
-const DEMO_EDGES = [
-  { id: "e1", fromId: "h", toId: "1", userId: "", createdAt: "" },
-  { id: "e2", fromId: "h", toId: "2", userId: "", createdAt: "" },
-  { id: "e3", fromId: "h", toId: "3", userId: "", createdAt: "" },
-  { id: "e4", fromId: "h", toId: "4", userId: "", createdAt: "" },
-  { id: "e5", fromId: "h", toId: "5", userId: "", createdAt: "" },
-  { id: "e6", fromId: "h", toId: "6", userId: "", createdAt: "" },
-  { id: "e7", fromId: "h", toId: "7", userId: "", createdAt: "" },
-  { id: "e8", fromId: "h", toId: "8", userId: "", createdAt: "" },
-  { id: "e9", fromId: "h", toId: "9", userId: "", createdAt: "" },
-];
 
 const PARTICLES = [
   { x: 12, y: 85, o: 0.17, dur: 7, del: 0.2 },
@@ -105,21 +77,6 @@ const AbstractBackground = () => {
   );
 };
 
-const StatCard = ({ label, value, icon: Icon }: { label: string; value: string; icon: React.ComponentType<{ className?: string }> }) => (
-  <motion.div
-    initial={{ opacity: 0, y: 20 }}
-    whileInView={{ opacity: 1, y: 0 }}
-    viewport={{ once: true }}
-    className="flex flex-col items-center p-8 rounded-2xl bg-white/[0.02] border border-white/[0.05] hover:border-[#D4AF37]/30 transition-colors group"
-  >
-    <div className="w-12 h-12 rounded-full bg-[#D4AF37]/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-      <Icon className="w-6 h-6 text-[#D4AF37]" />
-    </div>
-    <span className="text-4xl md:text-5xl font-serif italic mb-2">{value}</span>
-    <span className="text-[10px] uppercase tracking-[0.3em] text-white/40">{label}</span>
-  </motion.div>
-);
-
 export default function LandingPage() {
   const { scrollYProgress } = useScroll();
 
@@ -156,16 +113,6 @@ export default function LandingPage() {
           transition={{ duration: 1.5, ease: [0.22, 1, 0.36, 1] }}
           className="z-10"
         >
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.5, duration: 2 }}
-            className="mb-8 inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-white/10 bg-white/5 backdrop-blur-md"
-          >
-            <Sparkles className="w-3 h-3 text-[#D4AF37]" />
-            <span className="text-[9px] uppercase tracking-[0.2em] text-white/60">Invite only beta now open</span>
-          </motion.div>
-
           <h1 className="text-6xl md:text-[10rem] font-serif italic tracking-tighter leading-[0.85] mb-8">
             Your life,<br />mapped.
           </h1>
@@ -198,37 +145,6 @@ export default function LandingPage() {
         </motion.div>
       </motion.section>
 
-      {/* Stats — Global Footprint */}
-      <section className="relative py-48 px-6 overflow-hidden">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-24 space-y-4">
-            <h2 className="text-sm uppercase tracking-[0.4em] text-[#D4AF37] font-medium">Global Footprint</h2>
-            <p className="text-3xl md:text-5xl font-serif italic">The world, as seen by Trace.</p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <StatCard icon={Globe} label="Countries Traced" value="142" />
-            <StatCard icon={History} label="Miles Remembered" value="8.4M" />
-            <StatCard icon={MapPin} label="Hidden Gems Found" value="12,402" />
-          </div>
-
-          <motion.div
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            className="mt-24 p-12 rounded-3xl bg-gradient-to-br from-white/[0.03] to-transparent border border-white/[0.05] text-center"
-          >
-            <p className="text-white/40 text-sm font-light italic max-w-xl mx-auto leading-relaxed">
-              &ldquo;Trace isn&apos;t just a map. It&apos;s a way to see the threads of my life woven across the planet.
-              I finally feel like I&apos;m not just visiting places, but keeping them.&rdquo;
-            </p>
-            <div className="mt-6 flex items-center justify-center gap-3">
-              <div className="w-8 h-px bg-white/10" />
-              <span className="text-[10px] uppercase tracking-[0.2em] text-white/20">A frequent explorer</span>
-              <div className="w-8 h-px bg-white/10" />
-            </div>
-          </motion.div>
-        </div>
-      </section>
 
       {/* Explorer Dashboard Preview */}
       <section className="py-36 px-6 relative overflow-hidden">
@@ -301,158 +217,11 @@ export default function LandingPage() {
               </div>
             </div>
 
-            {/* Rank progress */}
-            <div className="border-t border-white/[0.05] px-6 py-4 flex items-center gap-4">
-              <div className="flex-1">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-2">
-                    <span className="text-[9px] uppercase tracking-[0.15em] text-white/25">Explorer &rarr; Globetrotter</span>
-                    {/* <span className="px-2 py-0.5 rounded-full text-[7px] uppercase tracking-[0.15em] font-medium border border-white/10 bg-white/[0.03] text-white/25">Soon</span> */}
-                  </div>
-                  <span className="text-[9px] text-white/20">24 / 50 cities</span>
-                </div>
-                <div className="w-full h-1 bg-white/[0.05] rounded-full overflow-hidden">
-                  <motion.div
-                    initial={{ width: 0 }}
-                    whileInView={{ width: "48%" }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 1.5, ease: "easeOut", delay: 0.3 }}
-                    className="h-full bg-gradient-to-r from-[#D4AF37]/50 to-[#D4AF37] rounded-full"
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Achievement badges */}
-            <div className="border-t border-white/[0.05] px-6 py-4">
-              <div className="flex items-center gap-2 mb-3">
-                <span className="text-[9px] uppercase tracking-[0.2em] text-white/20">Badges Earned</span>
-                {/* <span className="px-2 py-0.5 rounded-full text-[7px] uppercase tracking-[0.15em] font-medium border border-white/10 bg-white/[0.03] text-white/25">Soon</span> */}
-              </div>
-              <div className="flex items-center gap-3">
-                {[
-                  { icon: MapPin, label: "10 Cities", earned: true },
-                  { icon: Globe, label: "5 Countries", earned: true },
-                  { icon: Palmtree, label: "Island Hop", earned: true },
-                  { icon: Mountain, label: "Peak Seeker", earned: false },
-                  { icon: Navigation, label: "Equator Cross", earned: false },
-                ].map((badge, i) => (
-                  <div
-                    key={i}
-                    className={`relative flex flex-col items-center gap-1.5 px-3 py-2.5 rounded-lg border ${
-                      badge.earned
-                        ? "border-[#D4AF37]/20 bg-[#D4AF37]/[0.06]"
-                        : "border-white/[0.04] bg-white/[0.01] opacity-35"
-                    } flex-1 min-w-0`}
-                  >
-                    <badge.icon className={`w-3.5 h-3.5 ${badge.earned ? "text-[#D4AF37]" : "text-white/30"}`} />
-                    <span className={`text-[7px] uppercase tracking-[0.1em] text-center leading-tight ${badge.earned ? "text-[#D4AF37]/70" : "text-white/20"}`}>
-                      {badge.label}
-                    </span>
-                    {!badge.earned && (
-                      <Lock className="absolute top-1 right-1 w-2 h-2 text-white/15" />
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
           </motion.div>
 
           <p className="text-center text-white/20 text-[10px] uppercase tracking-[0.2em] mt-8">This is what your dashboard looks like inside Trace</p>
         </div>
       </section>
-
-      {/* === COMING SOON: Hidden Gems Section ===
-      <section className="py-48 px-6 relative overflow-hidden">
-        <div className="absolute top-1/2 left-0 w-[400px] h-[400px] bg-[radial-gradient(circle,#D4AF3706_0%,transparent_70%)] pointer-events-none" />
-        <div className="max-w-7xl mx-auto">
-          <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
-            <div className="space-y-4">
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-[#D4AF37]/15 bg-[#D4AF37]/5">
-                <Mountain className="w-3 h-3 text-[#D4AF37]" />
-                <span className="text-[9px] uppercase tracking-[0.2em] text-[#D4AF37]">Hidden Gems</span>
-              </div>
-              <h2 className="text-3xl md:text-5xl font-serif italic">Discovered by explorers like you.</h2>
-              <p className="text-white/40 text-sm max-w-md leading-relaxed">The best travel stories come from places nobody told you about. See what the community has uncovered.</p>
-            </div>
-            <Link href="/login" className="text-[10px] uppercase tracking-[0.2em] text-[#D4AF37] hover:text-white transition-colors whitespace-nowrap flex items-center gap-2 group">
-              Explore all gems
-              <ChevronRight className="w-3 h-3 transition-transform group-hover:translate-x-1" />
-            </Link>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {[
-              { img: "https://images.unsplash.com/photo-1504893524553-b855bce32c67?w=600&q=80", place: "Hallstatt", country: "Austria", tag: "Lakeside village frozen in time", by: "explorer_anna" },
-              { img: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=600&q=80", place: "Chefchaouen", country: "Morocco", tag: "The blue pearl of the Rif Mountains", by: "wanderer_kai" },
-              { img: "https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=600&q=80", place: "Lofoten Islands", country: "Norway", tag: "Arctic beauty above the circle", by: "north_seeker" },
-            ].map((gem, i) => (
-              <motion.div key={i} initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.8, delay: i * 0.15 }} className="group cursor-pointer">
-                <div className="relative rounded-2xl overflow-hidden mb-5">
-                  <img src={gem.img} alt={gem.place} className="w-full aspect-[4/5] object-cover group-hover:scale-105 transition-transform duration-700" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
-                  <div className="absolute bottom-0 left-0 right-0 p-6">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Eye className="w-3 h-3 text-[#D4AF37]" />
-                      <span className="text-[9px] uppercase tracking-[0.2em] text-[#D4AF37]">Hidden Gem</span>
-                    </div>
-                    <h3 className="text-2xl font-serif italic">{gem.place}</h3>
-                    <p className="text-white/50 text-xs mt-1">{gem.country}</p>
-                  </div>
-                </div>
-                <p className="text-white/40 text-sm font-light italic leading-relaxed mb-2">&ldquo;{gem.tag}&rdquo;</p>
-                <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 rounded-full bg-[#D4AF37]/20 border border-[#D4AF37]/30" />
-                  <span className="text-[9px] uppercase tracking-[0.15em] text-white/20">@{gem.by}</span>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-      */}
-
-      {/* === COMING SOON: Memory, Not Metrics Section ===
-      <section className="py-48 px-6 relative overflow-hidden">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-[radial-gradient(circle_at_center,#D4AF3708_0%,transparent_70%)] pointer-events-none" />
-        <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-32 items-center">
-          <motion.div initial={{ opacity: 0, x: -40 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 1.2 }}>
-            <h2 className="text-5xl md:text-7xl font-serif italic mb-10 leading-tight">
-              Travel fades.<br />Memory shouldn&apos;t.
-            </h2>
-            <p className="text-xl text-white/50 font-light leading-relaxed mb-12">
-              Photos get buried in a cloud. Notes disappear in old journals.
-              Trace keeps each place alive — privately, beautifully, and in context.
-            </p>
-            <div className="space-y-6">
-              {[
-                "Automatic path generation",
-                "Atmospheric time-of-day rendering",
-                "Encrypted, offline-first storage",
-              ].map((text, i) => (
-                <div key={i} className="flex items-center gap-4 text-white/80">
-                  <div className="w-1.5 h-1.5 rounded-full bg-[#D4AF37]" />
-                  <span className="text-sm font-light tracking-wide">{text}</span>
-                </div>
-              ))}
-            </div>
-          </motion.div>
-
-          <div className="relative aspect-square flex items-center justify-center">
-            <div className="absolute inset-0 border border-white/5 rounded-full animate-[spin_60s_linear_infinite]" />
-            <div className="absolute inset-12 border border-white/5 rounded-full animate-[spin_40s_linear_infinite_reverse]" />
-            <motion.div animate={{ rotate: 360 }} transition={{ duration: 100, repeat: Infinity, ease: "linear" }} className="relative z-10 w-full h-full flex items-center justify-center">
-              {[...Array(8)].map((_, i) => (
-                <motion.div key={i} className="absolute w-1 h-1 bg-[#D4AF37] rounded-full" style={{ transform: `rotate(${i * 45}deg) translateY(-180px)` }} animate={{ opacity: [0.2, 1, 0.2] }} transition={{ duration: 3, repeat: Infinity, delay: i * 0.4 }} />
-              ))}
-              <div className="w-32 h-32 rounded-full bg-gradient-to-br from-[#D4AF37]/20 to-transparent backdrop-blur-2xl border border-[#D4AF37]/30 flex items-center justify-center">
-                <Compass className="text-[#D4AF37] w-10 h-10 animate-pulse" />
-              </div>
-            </motion.div>
-          </div>
-        </div>
-      </section>
-      */}
 
       {/* 2. The Promise */}
       <section className="py-48 px-6">
@@ -507,94 +276,18 @@ export default function LandingPage() {
         </motion.div>
       </section>
 
-      {/* 5. The Tease — blurred globe peek */}
-      <section className="py-48 px-6 text-center relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#D4AF37]/5 to-transparent" />
-
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 1.5 }}
-          className="max-w-5xl mx-auto relative z-10"
-        >
-          <div className="space-y-8 mb-16">
-            <h2 className="text-5xl md:text-8xl font-serif italic tracking-tighter">
-              There&apos;s a reason we don&apos;t show it all.
-            </h2>
-            <p className="text-xl md:text-2xl text-white/40 font-light leading-relaxed italic max-w-2xl mx-auto">
-              Your map is personal. Here&apos;s just a glimpse.
-            </p>
-          </div>
-
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 1.2, ease: "easeOut" }}
-            className="relative rounded-2xl overflow-hidden mx-auto"
-            style={{
-              height: 420,
-              maxWidth: 750,
-              background: "#020209",
-              border: "1px solid rgba(255,255,255,0.04)",
-            }}
-          >
-            <MapView
-              nodes={DEMO_NODES as any}
-              edges={DEMO_EDGES as any}
-              selectedNodeId={null}
-              connectingFromId={null}
-              homeNodeId="h"
-              onNodeClick={() => {}}
-            />
-            {/* Heavy blur + fade overlay */}
-            <div
-              className="absolute inset-0 pointer-events-none"
-              style={{
-                backdropFilter: "blur(6px)",
-                WebkitBackdropFilter: "blur(6px)",
-                background: "radial-gradient(circle at 50% 50%, transparent 20%, rgba(5,5,5,0.7) 70%, rgba(5,5,5,0.95) 100%)",
-              }}
-            />
-            {/* Center label */}
-            <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-10">
-              <div
-                className="px-6 py-3 rounded-full mb-4"
-                style={{
-                  background: "rgba(8,8,20,0.8)",
-                  border: "1px solid rgba(200,160,32,0.2)",
-                  backdropFilter: "blur(16px)",
-                }}
-              >
-                <span className="text-[10px] uppercase tracking-[0.25em] text-[#D4AF37]/60">Sign in to reveal your globe</span>
-              </div>
-              <Link href="/login">
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="px-8 py-3 bg-[#D4AF37] text-black rounded-full font-bold tracking-widest uppercase text-[10px] transition-all hover:shadow-[0_0_30px_rgba(212,175,55,0.3)]"
-                >
-                  Create my map
-                </motion.button>
-              </Link>
-            </div>
-          </motion.div>
-
-          <p className="text-white/15 text-[10px] uppercase tracking-[0.2em] mt-8">
-            What you see above is just a preview — your globe is uniquely yours
-          </p>
-        </motion.div>
-      </section>
-
-      {/* 6. Final CTA */}
+      {/* Final CTA */}
       <section className="py-64 px-6 text-center relative overflow-hidden">
         <div className="absolute inset-0 flex items-center justify-center">
-          <motion.div
-            animate={{ scale: [1, 1.1, 1], opacity: [0.05, 0.1, 0.05] }}
-            transition={{ duration: 10, repeat: Infinity }}
-            className="w-[1000px] h-[1000px] border border-[#D4AF37] rounded-full"
-          />
+          {[0, 1, 2].map((i) => (
+            <motion.div
+              key={i}
+              animate={{ scale: [1, 1.05 + i * 0.02, 1], opacity: [0.03, 0.07, 0.03] }}
+              transition={{ duration: 8 + i * 3, repeat: Infinity, delay: i * 1.5 }}
+              className="absolute rounded-full border border-[#D4AF37]"
+              style={{ width: 500 + i * 300, height: 500 + i * 300 }}
+            />
+          ))}
         </div>
 
         <motion.div
@@ -602,11 +295,20 @@ export default function LandingPage() {
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 2 }}
-          className="relative z-10 space-y-16"
+          className="relative z-10"
         >
-          <h2 className="text-5xl md:text-8xl font-serif italic tracking-tighter">
+          <div className="w-px h-20 bg-gradient-to-b from-transparent via-[#D4AF37]/30 to-transparent mx-auto mb-16" />
+
+          <p className="text-white/30 text-xs uppercase tracking-[0.3em] mb-8">Your globe is waiting</p>
+
+          <h2 className="text-5xl md:text-8xl font-serif italic tracking-tighter mb-8">
             See your life<br />come together.
           </h2>
+
+          <p className="text-lg text-white/30 font-light leading-relaxed max-w-lg mx-auto mb-16">
+            Every journey you&apos;ve taken, every place you&apos;ve loved &mdash;
+            rendered on a globe that belongs only to you.
+          </p>
 
           <div className="flex flex-col items-center gap-8">
             <Link href="/login?mode=join">
@@ -618,10 +320,7 @@ export default function LandingPage() {
                 Create my map
               </motion.button>
             </Link>
-            <div className="space-y-2">
-              <p className="text-white/40 text-sm font-light tracking-widest uppercase">Free • Private • Secure</p>
-              <p className="text-white/20 text-[10px] uppercase tracking-widest">Takes less than a minute to start your journey</p>
-            </div>
+            <p className="text-white/40 text-sm font-light tracking-widest uppercase">Free &middot; Private &middot; Secure</p>
           </div>
         </motion.div>
       </section>
@@ -631,9 +330,9 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-12">
           <div className="text-2xl font-serif italic">Trace</div>
           <div className="flex gap-12">
-            <span className="text-[10px] uppercase tracking-[0.2em] text-white/40 hover:text-white transition-colors cursor-pointer">Privacy</span>
-            <span className="text-[10px] uppercase tracking-[0.2em] text-white/40 hover:text-white transition-colors cursor-pointer">Terms</span>
-            <span className="text-[10px] uppercase tracking-[0.2em] text-white/40 hover:text-white transition-colors cursor-pointer">Contact</span>
+            <Link href="/privacy" className="text-[10px] uppercase tracking-[0.2em] text-white/40 hover:text-white transition-colors">Privacy</Link>
+            <Link href="/terms" className="text-[10px] uppercase tracking-[0.2em] text-white/40 hover:text-white transition-colors">Terms</Link>
+            <a href="mailto:contact@trace.app" className="text-[10px] uppercase tracking-[0.2em] text-white/40 hover:text-white transition-colors">Contact</a>
           </div>
           <p className="text-[10px] uppercase tracking-[0.3em] text-white/20">&copy; 2026 Trace. Your life, mapped.</p>
         </div>

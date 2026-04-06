@@ -13,7 +13,7 @@ import { RegisterDto } from 'src/DTO/registerDTO';
 import { LoginDto } from 'src/DTO/loginDTO';
 
 const REFRESH_TOKEN_EXPIRY_DAYS = 7;
-const BCRYPT_ROUNDS = 12;
+const BCRYPT_ROUNDS = 10;
 
 @Injectable()
 export class AuthService {

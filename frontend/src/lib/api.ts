@@ -44,6 +44,14 @@ export class ApiClient {
     return this.refreshPromise;
   }
 
+  private static readonly PUBLIC_AUTH_ENDPOINTS = [
+    "/auth/login",
+    "/auth/register",
+    "/auth/google",
+    "/auth/refresh",
+    "/auth/logout",
+  ];
+
   private async request<T>(
     endpoint: string,
     options: RequestInit = {},
@@ -62,14 +70,16 @@ export class ApiClient {
     });
 
     if (response.status === 401) {
-      const refreshed = await this.tryRefreshToken();
+      const isPublicAuth = ApiClient.PUBLIC_AUTH_ENDPOINTS.includes(endpoint);
 
-      if (refreshed) {
-        return this.request(endpoint, options);
+      if (!isPublicAuth) {
+        const refreshed = await this.tryRefreshToken();
+        if (refreshed) {
+          return this.request(endpoint, options);
+        }
+        this.clearAccessToken();
+        throw new Error("Session expired. Please log in again.");
       }
-
-      this.clearAccessToken();
-      throw new Error("Session expired. Please log in again.");
     }
 
     if (!response.ok) {
