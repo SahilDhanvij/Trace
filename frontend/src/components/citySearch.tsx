@@ -76,9 +76,8 @@ export default function CitySearch(props: CitySearchProps) {
   return (
     <div ref={containerRef} className="relative">
       <div
-        className="flex items-center gap-2.5 px-3.5 cursor-text"
+        className="flex items-center gap-2.5 px-3.5 cursor-text w-[140px] md:w-[220px]"
         style={{
-          width: 220,
           height: 38,
           borderRadius: 12,
         }}
@@ -87,7 +86,7 @@ export default function CitySearch(props: CitySearchProps) {
         {loading ? (
           <div
             className="w-3.5 h-3.5 rounded-full border-2 border-transparent flex-shrink-0 animate-spin"
-            style={{ borderTopColor: "rgba(200, 160, 32, 0.6)" }}
+            style={{ borderTopColor: "rgba(255, 215, 0, 0.6)" }}
           />
         ) : (
           <svg
@@ -95,7 +94,7 @@ export default function CitySearch(props: CitySearchProps) {
             height="14"
             viewBox="0 0 24 24"
             fill="none"
-            stroke="rgba(200, 160, 32, 0.5)"
+            stroke="rgba(255, 215, 0, 0.5)"
             strokeWidth="2"
             strokeLinecap="round"
             className="flex-shrink-0"
@@ -132,10 +131,7 @@ export default function CitySearch(props: CitySearchProps) {
               setResults([]);
               setOpen(false);
             }}
-            className="flex-shrink-0 p-0.5 rounded-full transition-colors"
-            style={{ color: "rgba(255,255,255,0.3)" }}
-            onMouseEnter={(e) => (e.currentTarget.style.color = "rgba(255,255,255,0.6)")}
-            onMouseLeave={(e) => (e.currentTarget.style.color = "rgba(255,255,255,0.3)")}
+            className="flex-shrink-0 p-0.5 rounded-full transition-colors text-white/30 hover:text-white/60"
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
               <path d="M18 6L6 18M6 6l12 12" />
@@ -151,7 +147,7 @@ export default function CitySearch(props: CitySearchProps) {
             width: 300,
             borderRadius: 14,
             background: "rgba(8, 8, 20, 0.92)",
-            border: "1px solid rgba(200, 160, 32, 0.12)",
+            border: "1px solid rgba(255, 215, 0, 0.12)",
             backdropFilter: "blur(24px)",
             WebkitBackdropFilter: "blur(24px)",
             boxShadow: "0 12px 48px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.04)",
@@ -162,8 +158,8 @@ export default function CitySearch(props: CitySearchProps) {
             style={{ borderBottom: "1px solid rgba(255,255,255,0.04)" }}
           >
             <span
-              className="text-[9px] uppercase tracking-[0.2em]"
-              style={{ color: "rgba(200, 160, 32, 0.35)" }}
+              className="text-[11px] uppercase tracking-[0.2em]"
+              style={{ color: "rgba(255, 215, 0, 0.5)" }}
             >
               Results
             </span>
@@ -172,25 +168,19 @@ export default function CitySearch(props: CitySearchProps) {
             <button
               key={i}
               onClick={() => handleSelect(r)}
-              className="w-full flex items-center gap-3 px-3.5 py-2.5 text-left transition-all duration-150"
+              className="w-full flex items-center gap-3 px-3.5 py-2.5 text-left transition-all duration-150 hover:bg-gold-50"
               style={{
                 borderBottom:
                   i < results.length - 1
                     ? "1px solid rgba(255,255,255,0.03)"
                     : "none",
               }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = "rgba(200, 160, 32, 0.06)";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = "transparent";
-              }}
             >
               <div
                 className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0"
-                style={{ background: "rgba(200, 160, 32, 0.08)" }}
+                style={{ background: "rgba(255, 215, 0, 0.08)" }}
               >
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="rgba(200, 160, 32, 0.6)" className="flex-shrink-0">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="rgba(255, 215, 0, 0.6)" className="flex-shrink-0">
                   <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" />
                 </svg>
               </div>

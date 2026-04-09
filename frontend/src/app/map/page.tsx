@@ -9,7 +9,9 @@ import CitySearch from "@/components/citySearch";
 import dynamic from "next/dynamic";
 import HomeCityModal from "@/components/homeCityModal";
 import VaultPanel from "@/components/vaultPanel";
+import OnboardingHint from "@/components/onboardingHint";
 import type { MapViewHandle } from "@/components/mapView";
+import { Search, Bell, LogOut, Sun, Moon, X } from "lucide-react";
 
 const MapView = dynamic(() => import("@/components/mapView"), { ssr: false });
 
@@ -24,6 +26,9 @@ export default function MapPage() {
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [vaultNode, setVaultNode] = useState<Node | null>(null);
   const [pendingEdgeNodeId, setPendingEdgeNodeId] = useState<string | null>(null);
+  const [homeJustSet, setHomeJustSet] = useState(false);
+  const [showSearch, setShowSearch] = useState(false);
+  const [dayMode, setDayMode] = useState(true);
   const mapRef = useRef<MapViewHandle>(null);
 
   useEffect(() => {
@@ -63,7 +68,7 @@ export default function MapPage() {
     try {
       await api.logout();
     } catch {
-      // Best-effort — still clear local state and redirect
+      // Best-effort
     }
     api.clearAccessToken();
     window.location.href = "/login";
@@ -75,13 +80,14 @@ export default function MapPage() {
     );
     setHomeNodeId(homeNode.id);
     setShowHomeModal(false);
-    toast.success(`🏠 ${homeNode.name} set as home!`);
+    setHomeJustSet(true);
+    toast.success(`${homeNode.name} set as home!`);
   }, []);
 
   const handleCitySelected = useCallback(
     async (result: GeoCodingResult) => {
       if (!homeNodeId) {
-        toast("Set your home city first!", { icon: "🏠" });
+        toast("Set your home city first!");
         setShowHomeModal(true);
         return;
       }
@@ -95,7 +101,8 @@ export default function MapPage() {
         setPendingEdgeNodeId(newNode.id);
         setSelectedNodeId(newNode.id);
         setVaultNode(newNode);
-        toast.success(`📍 ${result.name} added — upload 2 photos to connect!`);
+        setShowSearch(false);
+        toast.success(`${result.name} added — upload 2 photos to connect!`);
       } catch (error: any) {
         toast.error(error.message || "Failed to add city.");
       }
@@ -125,12 +132,9 @@ export default function MapPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-black">
-        <div
-          className="text-sm tracking-widest font-mono animate-pulse"
-          style={{ color: "rgba(0,220,255,0.5)" }}
-        >
-          LOADING TRACE...
+      <div className="min-h-screen flex items-center justify-center bg-[#050508]">
+        <div className="text-sm tracking-[0.3em] font-mono animate-pulse text-gold-500">
+          INITIALIZING TRACE...
         </div>
       </div>
     );
@@ -139,7 +143,7 @@ export default function MapPage() {
   const homeNode = nodes.find((n) => n.id === homeNodeId);
 
   return (
-    <div className="h-screen w-screen relative overflow-hidden bg-black">
+    <div className="h-screen w-screen relative overflow-hidden bg-[#050508] flex flex-col">
       {showHomeModal && (
         <HomeCityModal
           currentHomeNode={homeNode?.name}
@@ -148,112 +152,100 @@ export default function MapPage() {
         />
       )}
 
-      <div className="absolute inset-0">
-        <MapView
-          ref={mapRef}
-          nodes={nodes}
-          edges={edges}
-          selectedNodeId={selectedNodeId}
-          connectingFromId={null}
-          homeNodeId={homeNodeId} // ← add this
-          onNodeClick={handleNodeClick}
+      {/* ── Top Navigation Bar ──────────────────────────────────── */}
+      <nav
+        className="shrink-0 flex items-center justify-between px-6 h-14 z-20"
+        style={{
+          background: "rgba(10,10,16,0.95)",
+          borderBottom: "1px solid rgba(255,215,0,0.08)",
+        }}
+      >
+        {/* Left: brand + tabs */}
+        <div className="flex items-center gap-8">
+          <span className="text-lg font-bold tracking-[0.25em] text-white">
+            TRACE
+          </span>
+
+          <div className="hidden md:flex items-center gap-1">
+            <button className="px-4 py-1.5 text-[13px] font-medium tracking-[0.15em] uppercase text-gold transition-colors">
+              Overview
+            </button>
+            <button className="px-4 py-1.5 text-[13px] font-medium tracking-[0.15em] uppercase text-white/40 hover:text-white/70 transition-colors">
+              Archives
+            </button>
+          </div>
+        </div>
+
+        {/* Right: search + icons */}
+        <div className="flex items-center gap-1">
+          {showSearch ? (
+            <div className="flex items-center gap-1">
+              <CitySearch onSelect={handleCitySelected} />
+              <button
+                onClick={() => setShowSearch(false)}
+                className="w-9 h-9 flex items-center justify-center rounded-lg text-white/50 hover:text-white hover:bg-white/[0.04] transition-colors"
+              >
+                <X className="w-[18px] h-[18px]" />
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={() => setShowSearch(true)}
+              className="w-9 h-9 flex items-center justify-center rounded-lg text-white/50 hover:text-gold hover:bg-white/[0.04] transition-colors"
+              title="Search city"
+            >
+              <Search className="w-[18px] h-[18px]" />
+            </button>
+          )}
+          <button
+            onClick={() => setDayMode((v) => !v)}
+            className="w-9 h-9 flex items-center justify-center rounded-lg text-white/50 hover:text-gold hover:bg-white/[0.04] transition-colors"
+            title={dayMode ? "Switch to night" : "Switch to day"}
+          >
+            {dayMode ? (
+              <Moon className="w-[18px] h-[18px]" />
+            ) : (
+              <Sun className="w-[18px] h-[18px]" />
+            )}
+          </button>
+          <button className="w-9 h-9 flex items-center justify-center rounded-lg text-white/50 hover:text-white/80 hover:bg-white/[0.04] transition-colors">
+            <Bell className="w-[18px] h-[18px]" />
+          </button>
+          <button
+            onClick={handleLogout}
+            className="w-9 h-9 flex items-center justify-center rounded-lg text-white/50 hover:text-red-400 hover:bg-white/[0.04] transition-colors"
+            title="Log out"
+          >
+            <LogOut className="w-[18px] h-[18px]" />
+          </button>
+        </div>
+      </nav>
+
+      {/* ── Main content area ───────────────────────────────────── */}
+      <div className="flex-1 relative overflow-hidden">
+        {/* Globe */}
+        <div className="absolute inset-0">
+          <MapView
+            ref={mapRef}
+            nodes={nodes}
+            edges={edges}
+            selectedNodeId={selectedNodeId}
+            connectingFromId={null}
+            homeNodeId={homeNodeId}
+            dayMode={dayMode}
+            onNodeClick={handleNodeClick}
+          />
+        </div>
+
+        {/* Onboarding tooltip sequence */}
+        <OnboardingHint
+          nodeCount={nodes.length}
+          hasHomeNode={!!homeNodeId}
+          homeJustSet={homeJustSet}
         />
       </div>
 
-      {/* Top bar */}
-      <div className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between px-5 pt-4">
-        {/* Left: brand */}
-        <div
-          className="text-[11px] font-medium tracking-[0.35em] pointer-events-none"
-          style={{
-            color: "rgba(200,160,32,0.8)",
-            fontFamily: "'Inter', system-ui, sans-serif",
-          }}
-        >
-          TRACE
-        </div>
-
-        {/* Right: toolbar */}
-        <div
-          className="flex items-center gap-0.5 px-2 py-1.5"
-          style={{
-            borderRadius: 14,
-            background: "rgba(12, 12, 28, 0.8)",
-            border: "1px solid rgba(200, 160, 32, 0.12)",
-            backdropFilter: "blur(24px)",
-            WebkitBackdropFilter: "blur(24px)",
-            boxShadow: "0 6px 32px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.03) inset",
-          }}
-        >
-          <CitySearch onSelect={handleCitySelected} />
-
-          <div className="w-px h-5 mx-1" style={{ background: "rgba(255,255,255,0.06)" }} />
-
-          <button
-            onClick={() => setShowHomeModal(true)}
-            className="flex items-center gap-2 px-3.5 py-2 transition-all duration-200"
-            style={{
-              borderRadius: 12,
-              color: "rgba(200,160,32,0.7)",
-              fontSize: 11,
-              fontFamily: "'Inter', system-ui, sans-serif",
-              letterSpacing: "0.06em",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = "rgba(200,160,32,0.08)";
-              e.currentTarget.style.color = "rgba(200,160,32,0.95)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = "transparent";
-              e.currentTarget.style.color = "rgba(200,160,32,0.7)";
-            }}
-          >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-4 0a1 1 0 01-1-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 01-1 1" />
-            </svg>
-            Home
-          </button>
-
-          <button
-            onClick={handleLogout}
-            className="flex items-center gap-2 px-3.5 py-2 transition-all duration-200"
-            style={{
-              borderRadius: 12,
-              color: "rgba(255,255,255,0.35)",
-              fontSize: 11,
-              fontFamily: "'Inter', system-ui, sans-serif",
-              letterSpacing: "0.06em",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = "rgba(255,255,255,0.06)";
-              e.currentTarget.style.color = "rgba(255,255,255,0.7)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = "transparent";
-              e.currentTarget.style.color = "rgba(255,255,255,0.35)";
-            }}
-          >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4" />
-              <polyline points="16 17 21 12 16 7" />
-              <line x1="21" y1="12" x2="9" y2="12" />
-            </svg>
-            Logout
-          </button>
-        </div>
-      </div>
-
-      {!showHomeModal && (
-        <div
-          className="absolute bottom-5 left-1/2 -translate-x-1/2 z-10 pointer-events-none text-[10px] tracking-[0.2em]"
-          style={{
-            color: "rgba(255,255,255,0.1)",
-            fontFamily: "'Inter', system-ui, sans-serif",
-          }}
-        >
-          DRAG TO ROTATE · SCROLL TO ZOOM
-        </div>
-      )}
+      {/* ── Vault Panel — right sidebar ─────────────────────────── */}
       <VaultPanel
         node={vaultNode}
         onClose={async () => {
@@ -261,7 +253,7 @@ export default function MapPage() {
             try {
               await api.deleteNode(vaultNode.id);
               setNodes((prev) => prev.filter((n) => n.id !== vaultNode.id));
-              toast("City removed — no photos were added.", { icon: "🗑️" });
+              toast("City removed — no photos were added.");
             } catch {}
             setPendingEdgeNodeId(null);
           }
@@ -272,7 +264,9 @@ export default function MapPage() {
           try {
             await api.deleteNode(nodeId);
             setNodes((prev) => prev.filter((n) => n.id !== nodeId));
-            setEdges((prev) => prev.filter((e) => e.fromId !== nodeId && e.toId !== nodeId));
+            setEdges((prev) =>
+              prev.filter((e) => e.fromId !== nodeId && e.toId !== nodeId),
+            );
             setPendingEdgeNodeId(null);
             setVaultNode(null);
             setSelectedNodeId(null);

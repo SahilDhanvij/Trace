@@ -10,6 +10,7 @@ interface MapViewProps {
   selectedNodeId: string | null;
   connectingFromId: string | null;
   homeNodeId: string | null;
+  dayMode?: boolean;
   onNodeClick: (node: Node) => void;
   onGlobeClick?: (lat: number, lng: number) => void;
 }
@@ -24,6 +25,7 @@ const MapView = forwardRef<MapViewHandle, MapViewProps>(function MapView({
   selectedNodeId,
   connectingFromId,
   homeNodeId,
+  dayMode = true,
   onNodeClick,
 }, ref) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -46,13 +48,13 @@ const MapView = forwardRef<MapViewHandle, MapViewProps>(function MapView({
       const ren = new T.WebGLRenderer({ antialias: true });
       ren.setSize(W, H);
       ren.setPixelRatio(Math.min(devicePixelRatio, 2));
-      ren.setClearColor(0x020209);
+      ren.setClearColor(0x050508);
       ren.domElement.style.display = "block";
       el.appendChild(ren.domElement);
 
       const scene = new T.Scene();
       const cam = new T.PerspectiveCamera(42, W / H, 0.1, 500);
-      cam.position.set(0, 0, 4.5);
+      cam.position.set(0, 0, 3.8);
 
       // resize
       const onRz = () => {
@@ -109,7 +111,7 @@ const MapView = forwardRef<MapViewHandle, MapViewProps>(function MapView({
         g.setAttribute("color", new T.BufferAttribute(c, 3));
         g.setAttribute("twinkle", new T.BufferAttribute(tw, 1));
         const starMat = new T.ShaderMaterial({
-          uniforms: { uTime: { value: 0 } },
+          uniforms: { uTime: { value: 0 }, uOpacity: { value: 1.0 } },
           vertexShader: `
             attribute float size;
             attribute vec3 color;
@@ -126,13 +128,14 @@ const MapView = forwardRef<MapViewHandle, MapViewProps>(function MapView({
               gl_Position = projectionMatrix * mv;
             }`,
           fragmentShader: `
+            uniform float uOpacity;
             varying vec3 vC;
             void main(){
               float d = length(gl_PointCoord - .5) * 2.;
               if(d > 1.) discard;
               float core = 1. - smoothstep(0., 0.15, d);
               float glow = exp(-d * d * 3.5);
-              float a = core * 0.9 + glow * 0.5;
+              float a = (core * 0.9 + glow * 0.5) * uOpacity;
               vec3 col = vC * (core + glow * 0.6);
               gl_FragColor = vec4(col, a);
             }`,
@@ -148,74 +151,135 @@ const MapView = forwardRef<MapViewHandle, MapViewProps>(function MapView({
       const globe = new T.Group();
       scene.add(globe);
 
-      const tex = new T.TextureLoader().load("/earth-blue-marble.jpg");
-      (tex as any).colorSpace = "srgb";
+      const loader = new T.TextureLoader();
+      const texNight = loader.load("/earth-night.jpg");
+      const texDay = loader.load("/earth-blue-marble.jpg");
+      (texNight as any).colorSpace = "srgb";
+      (texDay as any).colorSpace = "srgb";
+
+      let dayMix = 1;
+      let dayMixTarget = 1;
+
+      const earthMat = new T.ShaderMaterial({
+        uniforms: {
+          uTexNight: { value: texNight },
+          uTexDay: { value: texDay },
+          uTime: { value: 0 },
+          uDayMix: { value: 1.0 },
+        },
+        vertexShader: `
+          varying vec3 vN,vW; varying vec2 vUv;
+          void main(){
+            vN=normalize(normalMatrix*normal);
+            vW=(modelMatrix*vec4(position,1.)).xyz;
+            vUv=uv;
+            gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);
+          }`,
+        fragmentShader: `
+          precision highp float;
+          uniform sampler2D uTexNight;
+          uniform sampler2D uTexDay;
+          uniform float uDayMix;
+          varying vec3 vN,vW; varying vec2 vUv;
+          void main(){
+            vec3 vd=normalize(cameraPosition-vW);
+            float face=abs(dot(vd,vN));
+            float rim=1.-face;
+            float isFront=step(0.,dot(vd,vN));
+            float backFade=isFront+(1.-isFront)*0.35;
+
+            vec4 txNight=texture2D(uTexNight,vUv);
+            vec4 txDay=texture2D(uTexDay,vUv);
+
+            // Night: boosted city lights
+            vec3 cNight=txNight.rgb*1.8;
+            cNight+=vec3(0.02,0.08,0.18)*pow(rim,2.0)*0.4;
+
+            // Day: natural look with subtle sun-like lighting
+            vec3 cDay=txDay.rgb*1.1;
+            float sunDot=dot(vN, normalize(vec3(0.6,0.3,0.8)));
+            float diffuse=max(sunDot,0.0)*0.4+0.6;
+            cDay*=diffuse;
+            cDay+=vec3(0.15,0.25,0.4)*pow(rim,2.5)*0.3;
+
+            vec3 c=mix(cNight,cDay,uDayMix);
+            c*=backFade;
+            float a=(mix(0.95,1.0,uDayMix))*backFade;
+            gl_FragColor=vec4(c,a);
+          }`,
+        transparent: true,
+        depthWrite: false,
+        side: T.DoubleSide,
+      });
 
       const earth = new T.Mesh(
         new T.SphereGeometry(1, 128, 80),
-        new T.ShaderMaterial({
-          uniforms: { uTex: { value: tex }, uTime: { value: 0 } },
-          vertexShader: `
-            varying vec3 vN,vW; varying vec2 vUv;
-            void main(){
-              vN=normalize(normalMatrix*normal);
-              vW=(modelMatrix*vec4(position,1.)).xyz;
-              vUv=uv;
-              gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);
-            }`,
-          fragmentShader: `
-precision highp float;
-            uniform sampler2D uTex;
-            varying vec3 vN,vW; varying vec2 vUv;
-            void main(){
-              vec3 vd=normalize(cameraPosition-vW);
-              float face=abs(dot(vd,vN));
-              float rim=1.-face;
-              float isFront=step(0.,dot(vd,vN));
-              float backFade=isFront+(1.-isFront)*0.25;
-              vec4 tx=texture2D(uTex,vUv);
-              vec3 c=tx.rgb*1.4;
-              c+=vec3(0.05,0.15,0.4)*pow(rim,2.5)*0.6;
-              c*=1.0;
-              c*=backFade;
-              float a=0.92*backFade;
-              gl_FragColor=vec4(c,a);
-            }`,
-          transparent: true,
-          depthWrite: false,
-          side: T.DoubleSide,
-        }),
+        earthMat,
       );
       globe.add(earth);
 
-      // atmosphere inner
-      globe.add(
-        new T.Mesh(
-          new T.SphereGeometry(1.12, 64, 48),
-          new T.ShaderMaterial({
-            vertexShader: `varying vec3 vN,vW;void main(){vN=normalize(normalMatrix*normal);vW=(modelMatrix*vec4(position,1.)).xyz;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,
-            fragmentShader: `varying vec3 vN,vW;void main(){float rim=1.-abs(dot(normalize(cameraPosition-vW),vN));float g=pow(rim,1.4)*1.3;vec3 c=mix(vec3(0.,.12,.85),vec3(0.,.55,1.),rim);gl_FragColor=vec4(c*g,g*.85);}`,
-            transparent: true,
-            blending: T.AdditiveBlending,
-            side: T.BackSide,
-            depthWrite: false,
-          }),
-        ),
-      );
-      // atmosphere outer
-      globe.add(
-        new T.Mesh(
-          new T.SphereGeometry(1.32, 48, 32),
-          new T.ShaderMaterial({
-            vertexShader: `varying vec3 vN,vW;void main(){vN=normalize(normalMatrix*normal);vW=(modelMatrix*vec4(position,1.)).xyz;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,
-            fragmentShader: `varying vec3 vN,vW;void main(){float rim=1.-abs(dot(normalize(cameraPosition-vW),vN));float g=pow(rim,2.8)*.55;gl_FragColor=vec4(0.,.22,1.,g);}`,
-            transparent: true,
-            blending: T.AdditiveBlending,
-            side: T.BackSide,
-            depthWrite: false,
-          }),
-        ),
-      );
+      // ── Atmosphere ─────────────────────────────────────────────────
+      const atmoVS = `varying vec3 vN,vW;void main(){vN=normalize(normalMatrix*normal);vW=(modelMatrix*vec4(position,1.)).xyz;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`;
+
+      // Layer 1 — intense bright band hugging the surface
+      const atmoInnerMat = new T.ShaderMaterial({
+        uniforms: { uDayMix: { value: 1.0 } },
+        vertexShader: atmoVS,
+        fragmentShader: `
+          uniform float uDayMix;
+          varying vec3 vN,vW;
+          void main(){
+            float rim=1.-abs(dot(normalize(cameraPosition-vW),vN));
+            float g=pow(rim,1.2)*1.0;
+            vec3 nightC=vec3(.2,.12,.01)*rim;
+            vec3 dayC=vec3(.1,.25,.8)*rim + vec3(.05,.1,.3);
+            vec3 c=mix(nightC,dayC,uDayMix);
+            gl_FragColor=vec4(c*g, g*0.5);
+          }`,
+        transparent: true, blending: T.AdditiveBlending,
+        side: T.BackSide, depthWrite: false,
+      });
+      globe.add(new T.Mesh(new T.SphereGeometry(1.04, 80, 60), atmoInnerMat));
+
+      // Layer 2 — main visible blue glow
+      const atmoMidMat = new T.ShaderMaterial({
+        uniforms: { uDayMix: { value: 1.0 } },
+        vertexShader: atmoVS,
+        fragmentShader: `
+          uniform float uDayMix;
+          varying vec3 vN,vW;
+          void main(){
+            float rim=1.-abs(dot(normalize(cameraPosition-vW),vN));
+            float g=pow(rim,1.2)*1.2;
+            vec3 nightC=vec3(.2,.12,.01)*rim;
+            vec3 dayC=vec3(.05,.2,.9)*rim + vec3(.02,.08,.3);
+            vec3 c=mix(nightC,dayC,uDayMix);
+            gl_FragColor=vec4(c*g, g*0.6);
+          }`,
+        transparent: true, blending: T.AdditiveBlending,
+        side: T.BackSide, depthWrite: false,
+      });
+      globe.add(new T.Mesh(new T.SphereGeometry(1.15, 64, 48), atmoMidMat));
+
+      // Layer 3 — wide soft outer glow
+      const atmoOuterMat = new T.ShaderMaterial({
+        uniforms: { uDayMix: { value: 1.0 } },
+        vertexShader: atmoVS,
+        fragmentShader: `
+          uniform float uDayMix;
+          varying vec3 vN,vW;
+          void main(){
+            float rim=1.-abs(dot(normalize(cameraPosition-vW),vN));
+            float g=pow(rim,1.3)*1.2;
+            vec3 nightC=vec3(.2,.1,.01);
+            vec3 dayC=vec3(.04,.12,.55);
+            vec3 c=mix(nightC,dayC,uDayMix);
+            gl_FragColor=vec4(c*g, g*0.65);
+          }`,
+        transparent: true, blending: T.AdditiveBlending,
+        side: T.BackSide, depthWrite: false,
+      });
+      globe.add(new T.Mesh(new T.SphereGeometry(1.35, 48, 32), atmoOuterMat));
 
       // ── Coordinate helpers ────────────────────────────────────
       function ll(lat: number, lng: number, r = 1) {
@@ -288,7 +352,7 @@ precision highp float;
         ns.forEach((n) => {
           const isHome = n.id === hId;
           const isSel = n.id === selId;
-          const col = isSel ? 0x38bdf8 : 0xffc234;
+          const col = isSel ? 0xffd700 : 0xffd700;
           const sz = isHome ? 0.018 : 0.012;
           const pos = ll(Number(n.latitude), Number(n.longitude), 1.016);
           const g = new T.Group();
@@ -344,23 +408,25 @@ precision highp float;
           // arc line
           const pts: THREE.Vector3[] = [];
           for (let i = 0; i <= 100; i++) pts.push(bez(from, mid, to, i / 100));
-          arcGrp.add(
-            new T.Line(
-              new T.BufferGeometry().setFromPoints(pts),
-              new T.LineBasicMaterial({
-                color: 0xffc234,
-                transparent: true,
-                opacity: 0.55,
-                blending: T.AdditiveBlending,
-                depthWrite: false,
-              }),
-            ),
+          const arcLine = new T.Line(
+            new T.BufferGeometry().setFromPoints(pts),
+            new T.LineDashedMaterial({
+              color: 0xffd700,
+              transparent: true,
+              opacity: 0.5,
+              dashSize: 0.02,
+              gapSize: 0.015,
+              blending: T.AdditiveBlending,
+              depthWrite: false,
+            }),
           );
+          arcLine.computeLineDistances();
+          arcGrp.add(arcLine);
           // travelling dots (2–3 per arc)
           const dotCount = 2 + Math.floor(Math.random() * 2);
           for (let d = 0; d < dotCount; d++) {
             const dm = new T.MeshBasicMaterial({
-              color: 0xffffff,
+              color: 0xffd700,
               transparent: true,
               blending: T.AdditiveBlending,
               depthWrite: false,
@@ -385,8 +451,8 @@ precision highp float;
         ry = 0.6,
         trx = 0.25,
         tryy = 0.6;
-      let zm = 4.5,
-        tzm = 4.5;
+      let zm = 3.8,
+        tzm = 3.8;
       let drag = false,
         lx = 0,
         ly = 0,
@@ -409,8 +475,9 @@ precision highp float;
         artTimer = setTimeout(() => (autoR = true), 2800);
       });
       window.addEventListener("mousemove", (e) => {
-        mx = e.clientX;
-        my = e.clientY;
+        const rect = el.getBoundingClientRect();
+        mx = e.clientX - rect.left;
+        my = e.clientY - rect.top;
         if (!drag) return;
         tryy += (e.clientX - lx) * 0.006;
         trx += (e.clientY - ly) * 0.004;
@@ -432,6 +499,9 @@ precision highp float;
             drag = true;
             lx = e.touches[0].clientX;
             ly = e.touches[0].clientY;
+            const rect = el.getBoundingClientRect();
+            mx = e.touches[0].clientX - rect.left;
+            my = e.touches[0].clientY - rect.top;
             autoR = false;
           }
         },
@@ -454,10 +524,11 @@ precision highp float;
         { passive: true },
       );
 
-      // ── Tooltip ────────────────────────────────────────────────
+      // ── Tooltip — sci-fi styled label ─────────────────────────
       const tip = document.createElement("div");
       tip.style.cssText =
-        "position:absolute;pointer-events:none;z-index:10;background:rgba(0,0,0,.88);border:1px solid rgba(255,194,52,.5);color:#ffc234;font-size:9px;letter-spacing:2px;padding:5px 12px;transform:translate(-50%,-240%);opacity:0;transition:opacity .2s;text-transform:uppercase;white-space:nowrap;font-family:'Courier New',monospace";
+        "position:absolute;pointer-events:none;z-index:10;transform:translate(-50%,-280%);opacity:0;transition:opacity .2s;white-space:nowrap";
+      tip.innerHTML = `<div style="background:rgba(0,0,0,.85);border:1px solid rgba(255,215,0,.3);padding:6px 14px;text-align:center;backdrop-filter:blur(8px)"><div style="font-size:9px;letter-spacing:2.5px;color:rgba(255,215,0,.6);font-family:'Courier New',monospace;text-transform:uppercase;margin-bottom:2px" class="tip-label"></div><div style="font-size:12px;letter-spacing:1.5px;color:#fff;font-family:'Courier New',monospace;font-weight:bold" class="tip-name"></div></div>`;
       el.style.position = "relative";
       el.appendChild(tip);
 
@@ -517,11 +588,19 @@ precision highp float;
         globe.rotation.x = rx;
         globe.rotation.y = ry;
         cam.position.z = zm;
-        (earth.material as any).uniforms.uTime.value = t;
-        if (starMatRef) starMatRef.uniforms.uTime.value = t;
+
+        dayMix += (dayMixTarget - dayMix) * 0.04;
+        earthMat.uniforms.uTime.value = t;
+        earthMat.uniforms.uDayMix.value = dayMix;
+        atmoInnerMat.uniforms.uDayMix.value = dayMix;
+        atmoMidMat.uniforms.uDayMix.value = dayMix;
+        atmoOuterMat.uniforms.uDayMix.value = dayMix;
+        if (starMatRef) {
+          starMatRef.uniforms.uTime.value = t;
+        }
 
         // scale nodes/arcs relative to zoom so close cities don't blob together
-        const REF_ZM = 4.5;
+        const REF_ZM = 3.8;
         const nodeScale = zm / REF_ZM;
         const arcDotScale = zm / REF_ZM;
 
@@ -579,7 +658,10 @@ precision highp float;
           tip.style.left = (wp.x * 0.5 + 0.5) * cw + "px";
           tip.style.top = (-wp.y * 0.5 + 0.5) * ch + "px";
           const name = curNodes.find((n) => n.id === nd.id)?.name ?? "";
-          tip.textContent = (nd.home ? "⌂ " : "◉ ") + name;
+          const labelEl = tip.querySelector(".tip-label") as HTMLElement;
+          const nameEl = tip.querySelector(".tip-name") as HTMLElement;
+          if (labelEl) labelEl.textContent = nd.home ? "Home" : "";
+          if (nameEl) nameEl.textContent = name;
           tip.style.opacity = "1";
           cv.style.cursor = "pointer";
         } else {
@@ -601,6 +683,9 @@ precision highp float;
           trx = Math.max(-1.3, Math.min(1.3, trx));
           tzm = 3.2;
           artTimer = setTimeout(() => autoR = true, 5000);
+        },
+        setDayMode(v: boolean) {
+          dayMixTarget = v ? 1.0 : 0.0;
         },
         destroy() {
           dead = true;
@@ -634,11 +719,15 @@ precision highp float;
     internals.current?.rebuild(nodes, edges, selectedNodeId, homeNodeId);
   }, [nodes, edges, selectedNodeId, connectingFromId, homeNodeId]);
 
+  useEffect(() => {
+    internals.current?.setDayMode(dayMode);
+  }, [dayMode]);
+
   return (
     <div
       ref={containerRef}
       className="w-full h-full"
-      style={{ background: "#020209" }}
+      style={{ background: "#050508" }}
     />
   );
 });

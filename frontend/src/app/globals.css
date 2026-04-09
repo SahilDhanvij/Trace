@@ -2,15 +2,46 @@
 
 @theme {
   --font-serif: "Playfair Display", Georgia, "Times New Roman", serif;
+  --font-mono: "JetBrains Mono", "Fira Code", "Courier New", monospace;
+  --color-gold: #FFD700;
+  --color-gold-900: rgba(255, 215, 0, 0.9);
+  --color-gold-800: rgba(255, 215, 0, 0.8);
+  --color-gold-700: rgba(255, 215, 0, 0.7);
+  --color-gold-500: rgba(255, 215, 0, 0.5);
+  --color-gold-300: rgba(255, 215, 0, 0.3);
+  --color-gold-200: rgba(255, 215, 0, 0.2);
+  --color-gold-100: rgba(255, 215, 0, 0.12);
+  --color-gold-50: rgba(255, 215, 0, 0.05);
+  --color-surface: rgba(10, 10, 16, 0.98);
+  --color-surface-light: rgba(20, 20, 30, 0.95);
+  --color-danger: rgba(255, 80, 80, 0.8);
+  --color-danger-light: rgba(255, 80, 80, 0.45);
+  --color-danger-bg: rgba(255, 80, 80, 0.04);
 }
 
 html,
 body {
   width: 100%;
   min-height: 100%;
-  background: #050505;
+  background: #050508;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+:focus-visible {
+  outline: 2px solid rgba(255, 215, 0, 0.5);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+@keyframes fade-hint {
+  0% { opacity: 1; }
+  70% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+.animate-fade-hint {
+  animation: fade-hint 6s ease-out forwards;
 }
 
 

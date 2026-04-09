@@ -90,20 +90,17 @@ export default function HomeCityModal({
         className="w-full max-w-sm mx-4 rounded-2xl p-6 relative"
         style={{
           background: "rgba(10,10,30,0.98)",
-          border: "1px solid rgba(200,160,32,0.4)",
-          boxShadow: "0 0 60px rgba(200,160,32,0.1)",
+          border: "1px solid rgba(255,215,0,0.3)",
+          boxShadow: "0 0 60px rgba(255,215,0,0.08)",
         }}
         onClick={(e) => e.stopPropagation()}
       >
         {onClose && (
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 flex items-center justify-center w-7 h-7 rounded-full transition-colors"
-            style={{ background: "rgba(255,255,255,0.05)" }}
-            onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(255,255,255,0.1)")}
-            onMouseLeave={(e) => (e.currentTarget.style.background = "rgba(255,255,255,0.05)")}
+            className="absolute top-3 right-3 flex items-center justify-center w-9 h-9 rounded-full transition-colors bg-white/5 hover:bg-white/10"
           >
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" strokeWidth="2" strokeLinecap="round">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" strokeWidth="2" strokeLinecap="round">
               <path d="M18 6L6 18M6 6l12 12" />
             </svg>
           </button>
@@ -111,7 +108,7 @@ export default function HomeCityModal({
         <div className="mb-6 text-center">
           <div
             className="text-xs font-mono tracking-widest mb-2"
-            style={{ color: "#c8a020" }}
+            style={{ color: "#FFD700" }}
           >
             {currentHomeNode ? "CHANGE HOME CITY" : "WELCOME TO TRACE"}
           </div>
@@ -129,13 +126,13 @@ export default function HomeCityModal({
           className="flex items-center gap-2 rounded-xl px-3 py-2.5 mb-2"
           style={{
             background: "rgba(255,255,255,0.05)",
-            border: "1px solid rgba(200,160,32,0.3)",
+            border: "1px solid rgba(255,215,0,0.3)",
           }}
         >
           {loading ? (
             <div
               className="w-4 h-4 rounded-full border-2 border-transparent flex-shrink-0 animate-spin"
-              style={{ borderTopColor: "#c8a020" }}
+              style={{ borderTopColor: "#FFD700" }}
             />
           ) : (
             <svg
@@ -143,7 +140,7 @@ export default function HomeCityModal({
               height="14"
               viewBox="0 0 24 24"
               fill="none"
-              stroke="rgba(200,160,32,0.6)"
+              stroke="rgba(255,215,0,0.6)"
               strokeWidth="2"
               className="flex-shrink-0"
             >
@@ -173,7 +170,7 @@ export default function HomeCityModal({
                 key={i}
                 onClick={() => handleSelect(r)}
                 disabled={saving}
-                className="w-full flex items-center gap-3 px-4 py-3 text-left transition-colors"
+                className="w-full flex items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-gold-50"
                 style={{
                   borderBottom:
                     i < results.length - 1
@@ -181,14 +178,8 @@ export default function HomeCityModal({
                       : "none",
                   opacity: saving ? 0.5 : 1,
                 }}
-                onMouseEnter={(e) =>
-                  (e.currentTarget.style.background = "rgba(200,160,32,0.08)")
-                }
-                onMouseLeave={(e) =>
-                  (e.currentTarget.style.background = "transparent")
-                }
               >
-                <span style={{ color: "#c8a020" }}>⌂</span>
+                <span style={{ color: "#FFD700" }}>⌂</span>
                 <div className="min-w-0">
                   <span
                     className="block text-sm font-mono truncate"
@@ -211,7 +202,7 @@ export default function HomeCityModal({
         {saving && (
           <div
             className="mt-4 text-center text-xs font-mono"
-            style={{ color: "rgba(200,160,32,0.6)" }}
+            style={{ color: "rgba(255,215,0,0.6)" }}
           >
             SAVING...
           </div>
