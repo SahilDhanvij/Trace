@@ -1,23 +1,24 @@
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:3000";
 
+// Module-level variable — survives router.push(), not accessible via window/document
+let _accessToken: string | null = null;
+
 export class ApiClient {
   private baseUrl: string;
-  private accessToken: string | null = null;
+  private refreshPromise: Promise<boolean> | null = null;
 
   constructor() {
     this.baseUrl = API_BASE_URL;
   }
 
   setAccessToken(token: string) {
-    this.accessToken = token;
+    _accessToken = token;
   }
 
   clearAccessToken() {
-    this.accessToken = null;
+    _accessToken = null;
   }
-
-  private refreshPromise: Promise<boolean> | null = null;
 
   private async tryRefreshToken(): Promise<boolean> {
     if (this.refreshPromise) return this.refreshPromise;
@@ -59,8 +60,8 @@ export class ApiClient {
     const headers = new Headers(options.headers);
     headers.set("Content-Type", "application/json");
 
-    if (this.accessToken) {
-      headers.set("Authorization", `Bearer ${this.accessToken}`);
+    if (_accessToken) {
+      headers.set("Authorization", `Bearer ${_accessToken}`);
     }
 
     const response = await fetch(`${this.baseUrl}${endpoint}`, {
@@ -89,6 +90,7 @@ export class ApiClient {
 
     return response.json();
   }
+
   async loginWithGoogle(idToken: string) {
     return this.request<{
       accessToken: string;
@@ -183,12 +185,10 @@ export class ApiClient {
   }
 
   async createEdge(fromId: string, toId: string, traveledAt?: string) {
-    {
-      return this.request<any>("/edges", {
-        method: "POST",
-        body: JSON.stringify({ fromId, toId, traveledAt }),
-      });
-    }
+    return this.request<any>("/edges", {
+      method: "POST",
+      body: JSON.stringify({ fromId, toId, traveledAt }),
+    });
   }
 
   async deleteEdge(id: string) {

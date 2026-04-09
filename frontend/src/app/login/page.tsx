@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { api } from "@/lib/api";
 import toast from "react-hot-toast";
@@ -9,6 +9,7 @@ import { GoogleLogin, GoogleOAuthProvider } from "@react-oauth/google";
 import { Eye, EyeOff, ArrowLeft } from "lucide-react";
 
 function AuthForm() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const initialMode = searchParams.get("mode") === "join" ? "join" : "login";
 
@@ -31,7 +32,7 @@ function AuthForm() {
         const res = await api.loginWithEmail(email.trim(), password);
         api.setAccessToken(res.accessToken);
       }
-      window.location.href = "/map";
+      router.push("/map");
     } catch (err: any) {
       toast.error(err.message || "Something went wrong");
     } finally {
@@ -43,7 +44,7 @@ function AuthForm() {
     try {
       const res = await api.loginWithGoogle(credentialResponse.credential);
       api.setAccessToken(res.accessToken);
-      window.location.href = "/map";
+      router.push("/map");
     } catch {
       toast.error("Google sign-in failed. Please try again.");
     }

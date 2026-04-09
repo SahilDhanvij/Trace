@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { PrismaService } from 'src/common/prisma/prisma.service';
 import { OAuthDTO } from 'src/DTO/oAuthDTO';
 
@@ -10,6 +10,14 @@ export class UserService {
 
 
     async findOrCreateByGoogleid(oAuthDTO : OAuthDTO){
+        const existing = await this.prisma.user.findUnique({
+            where: {email: oAuthDTO.email},
+        });
+        if(existing && !existing.googleId){
+            throw new ConflictException(
+                'This account uses email/password sign-in. Please log in with your email and password.',
+            );
+        }
         return this.prisma.user.upsert({
             where : {googleId : oAuthDTO.googleId},
             update : {},

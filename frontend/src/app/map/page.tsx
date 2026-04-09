@@ -71,7 +71,7 @@ export default function MapPage() {
       // Best-effort
     }
     api.clearAccessToken();
-    window.location.href = "/login";
+    router.push("/login");
   };
 
   const handleHomeDone = useCallback((homeNode: Node) => {

@@ -44,6 +44,177 @@ body {
   animation: fade-hint 6s ease-out forwards;
 }
 
+/* ── Hero title hover ─────────────────────────────────────────────── */
+.hero-title {
+  cursor: default;
+  transition: text-shadow 0.5s ease;
+}
+
+.hero-title:hover {
+  text-shadow: 0 0 20px rgba(232, 197, 71, 0.08);
+}
+
+.hero-title-gold {
+  color: #E8C547;
+  font-style: italic;
+  position: relative;
+  display: inline-block;
+  background: linear-gradient(
+    90deg,
+    #E8C547 0%,
+    #F5D96E 50%,
+    #E8C547 100%
+  );
+  background-size: 100% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  transition: filter 0.6s ease;
+}
+
+.hero-title:hover .hero-title-gold {
+  filter: drop-shadow(0 0 12px rgba(232, 197, 71, 0.25));
+}
+
+@keyframes globe-breathe {
+  0%, 100% { transform: scale(1); opacity: 0.6; }
+  50% { transform: scale(1.06); opacity: 1; }
+}
+
+@keyframes globe-orbit {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* ── Emotional Hit: staggered line reveals ─────────────────────── */
+.emo-line {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: none;
+}
+
+.emo-visible .emo-line {
+  animation: emo-line-in 1s ease forwards;
+}
+
+.emo-visible .emo-line:nth-child(1) { animation-delay: 0.15s; }
+.emo-visible .emo-line:nth-child(2) { animation-delay: 0.7s; }
+.emo-visible .emo-line:nth-child(3) { animation-delay: 1.25s; }
+.emo-visible .emo-line:nth-child(4) { animation-delay: 2.2s; }
+
+@keyframes emo-line-in {
+  0% { opacity: 0; transform: translateY(24px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Wow Moment: SVG dot + arc animation ──────────────────────── */
+.wow-dot {
+  opacity: 0;
+  transform-origin: center;
+  transform: scale(0);
+}
+
+.wow-visible .wow-dot {
+  animation: dot-appear 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.wow-visible .wow-dot:nth-child(1) { animation-delay: 0.2s; }
+.wow-visible .wow-dot:nth-child(2) { animation-delay: 0.4s; }
+.wow-visible .wow-dot:nth-child(3) { animation-delay: 0.6s; }
+.wow-visible .wow-dot:nth-child(4) { animation-delay: 0.8s; }
+.wow-visible .wow-dot:nth-child(5) { animation-delay: 1.0s; }
+.wow-visible .wow-dot:nth-child(6) { animation-delay: 1.2s; }
+.wow-visible .wow-dot:nth-child(7) { animation-delay: 1.4s; }
+
+@keyframes dot-appear {
+  0% { opacity: 0; transform: scale(0); }
+  70% { opacity: 1; transform: scale(1.4); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+.wow-arc {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  opacity: 0;
+}
+
+.wow-visible .wow-arc {
+  animation: arc-draw 1.2s ease forwards;
+}
+
+.wow-visible .wow-arc:nth-of-type(1) { animation-delay: 0.8s; }
+.wow-visible .wow-arc:nth-of-type(2) { animation-delay: 1.0s; }
+.wow-visible .wow-arc:nth-of-type(3) { animation-delay: 1.2s; }
+.wow-visible .wow-arc:nth-of-type(4) { animation-delay: 1.4s; }
+.wow-visible .wow-arc:nth-of-type(5) { animation-delay: 1.6s; }
+.wow-visible .wow-arc:nth-of-type(6) { animation-delay: 1.8s; }
+
+@keyframes arc-draw {
+  0% { stroke-dashoffset: 1; opacity: 0.5; }
+  100% { stroke-dashoffset: 0; opacity: 1; }
+}
+
+.wow-text {
+  opacity: 0;
+  transform: translateY(16px);
+}
+
+.wow-visible .wow-text {
+  animation: text-reveal 1s ease forwards;
+  animation-delay: 2.6s;
+}
+
+@keyframes text-reveal {
+  0% { opacity: 0; transform: translateY(16px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Steps: timeline line grow ────────────────────────────────── */
+.timeline-line {
+  transform: scaleX(0);
+  transform-origin: left center;
+}
+
+.timeline-visible .timeline-line {
+  animation: line-grow 1.2s ease forwards;
+  animation-delay: 0.3s;
+}
+
+@keyframes line-grow {
+  0% { transform: scaleX(0); }
+  100% { transform: scaleX(1); }
+}
+
+/* ── Differentiation: strikethrough ───────────────────────────── */
+.strike-word {
+  position: relative;
+  display: inline;
+}
+
+.strike-word::after {
+  content: '';
+  position: absolute;
+  left: -2px;
+  right: -2px;
+  top: 50%;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.5);
+  transform: scaleX(0);
+  transform-origin: left center;
+}
+
+.diff-visible .strike-word::after {
+  animation: strike-through 0.6s ease forwards;
+}
+
+.diff-visible .strike-word:nth-child(1)::after { animation-delay: 0.3s; }
+.diff-visible .strike-word:nth-child(2)::after { animation-delay: 0.8s; }
+.diff-visible .strike-word:nth-child(3)::after { animation-delay: 1.3s; }
+
+@keyframes strike-through {
+  0% { transform: scaleX(0); }
+  100% { transform: scaleX(1); }
+}
 
 .grain {
   position: fixed;
