@@ -1,12 +1,16 @@
-import { Injectable, UnauthorizedException } from "@nestjs/common";
+import { Injectable, OnModuleInit, UnauthorizedException } from "@nestjs/common";
 import { OAuth2Client } from "google-auth-library";
 
 @Injectable()
-export class googleService{
+export class googleService implements OnModuleInit{
     private client : OAuth2Client;
 
     constructor(){
         this.client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+    }
+
+    async onModuleInit() {
+        this.client.getFederatedSignonCertsAsync().catch(() => {});
     }
     async verify(idToken : string) : Promise<{
         googleId : string,
