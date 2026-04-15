@@ -3,7 +3,7 @@ import {
   UnauthorizedException,
   ConflictException,
 } from '@nestjs/common';
-import { hash, compare } from 'bcryptjs';
+import * as argon2 from 'argon2';
 import { googleService } from './google/googleService';
 import { UserService } from 'src/user/user.service';
 import { JwtService } from './jwt/jwt.service';
@@ -13,7 +13,6 @@ import { RegisterDto } from 'src/DTO/registerDTO';
 import { LoginDto } from 'src/DTO/loginDTO';
 
 const REFRESH_TOKEN_EXPIRY_DAYS = 7;
-const BCRYPT_ROUNDS = 10;
 
 @Injectable()
 export class AuthService {
@@ -65,7 +64,7 @@ export class AuthService {
       throw new ConflictException('An account with this email already exists');
     }
 
-    const passwordHash = await hash(dto.password, BCRYPT_ROUNDS);
+    const passwordHash = await argon2.hash(dto.password);
     const user = await this.userService.createWithPassword(
       dto.name,
       dto.email,
@@ -100,7 +99,7 @@ export class AuthService {
       );
     }
 
-    const valid = await compare(dto.password, user.passwordHash);
+    const valid = await argon2.verify(user.passwordHash, dto.password);
     if (!valid) {
       throw new UnauthorizedException('Invalid email or password');
     }
